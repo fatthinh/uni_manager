@@ -1,0 +1,54 @@
+import axios from "axios";
+
+const baseConfig = {
+  baseURL: "http://192.168.1.7:8000/api/",
+};
+
+export const endpoints = {
+  users: "users/",
+  user: (userId) => `users/${userId}/`,
+  currentUser: "users/current-user/",
+  theses: "theses/",
+  notActiveTheses: "theses/not-active/",
+  activeTheses: "theses/active/",
+  thesis: (thesisId) => `theses/${thesisId}/`,
+  toggleThesis: (thesisId) => `theses/${thesisId}/toggle-active/`,
+  myThesis: "theses/my-thesis/",
+  thesisReivews: (thesisId) => `theses/${thesisId}/reviews/`,
+  addReview: (thesisId) => `theses/${thesisId}/add-review/`,
+  updateReview: (thesisId) => `theses/${thesisId}/update-review/`,
+  publicUsers: "public-users/",
+  publicCouncils: "public-councils/",
+  councils: "councils/",
+  council: (councilId) => `councils/${councilId}/`,
+  councilMembers: (councilId) => `councils/${councilId}/members/`,
+  councilTheses: (councilId) => `councils/${councilId}/theses/`,
+  updateCouncilTheses: (councilId) => `councils/${councilId}/update-theses/`,
+  updateCouncilMembers: (councilId) => `councils/${councilId}/update-members/`,
+  updateCouncilMemberRole: (councilId) =>
+    `councils/${councilId}/update-member-role/`,
+  toggleCouncil: (councilId) => `councils/${councilId}/toggle-active/`,
+  lecturerCouncils: "councils/lecturer-councils/",
+  lecturerTheses: (councilId) => `councils/${councilId}/lecturer-theses/`,
+  myReview: (thesisId) => `theses/${thesisId}/my-review/`,
+};
+
+const createAuthAPI = (accessToken, params = {}) =>
+  axios.create({
+    ...baseConfig,
+    headers: {
+      Authorization: `bearer ${accessToken}`,
+    },
+    params,
+  });
+
+export const authAPIWithParams = (accessToken, params) =>
+  createAuthAPI(accessToken, {
+    page: params.page,
+    search: params.search,
+    filter: params.filter,
+  });
+
+export const authAPIWithoutParams = (accessToken) => createAuthAPI(accessToken);
+
+export default axios.create(baseConfig);

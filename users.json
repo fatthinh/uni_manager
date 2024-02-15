@@ -1,0 +1,72 @@
+[
+    {
+        "first_name": "Tran",
+        "last_name": "Thi B",
+        "username": "tranb",
+        "email": "tranb@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Le",
+        "last_name": "Van C",
+        "username": "levanc",
+        "email": "levanc@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Pham",
+        "last_name": "Thi D",
+        "username": "phamd",
+        "email": "phamd@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Nguyen",
+        "last_name": "Van E",
+        "username": "nguyene",
+        "email": "nguyene@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Tran",
+        "last_name": "Van F",
+        "username": "tranf",
+        "email": "tranf@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Le",
+        "last_name": "Thi G",
+        "username": "leg",
+        "email": "leg@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Pham",
+        "last_name": "Van H",
+        "username": "phamh",
+        "email": "phamh@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Nguyen",
+        "last_name": "Thi I",
+        "username": "nguyeni",
+        "email": "nguyeni@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Tran",
+        "last_name": "Van J",
+        "username": "tranj",
+        "email": "tranj@example.com",
+        "password": "12345678"
+    },
+    {
+        "first_name": "Le",
+        "last_name": "Thi K",
+        "username": "lek",
+        "email": "lek@example.com",
+        "password": "12345678"
+    }
+]
