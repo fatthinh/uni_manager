@@ -1,35 +1,45 @@
 import { useEffect, useState } from "react";
 import { View } from "react-native";
+import { useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent";
-import { authAPIWithoutParams, endpoints } from "../../configs/API";
+import { authAPIWithParams, endpoints } from "../../configs/API";
 import DefaultLayout from "../../layouts/DefaultLayout";
 import Theses from "./Theses";
 
 function ThesesPage({ route, navigation }) {
+  const { userInfo } = useSelector((state) => state.userLogin);
   const { token } = route.params;
-  const [theses, setTheses] = useState(null);
+  const [theses, setTheses] = useState([]);
   const [isActive, setIsActive] = useState(true);
 
-  useEffect(() => {
-    const loadTheses = async () => {
-      try {
-        let endpoint = isActive
-          ? endpoints.activeTheses
-          : endpoints.notActiveTheses;
-        const response = await authAPIWithoutParams(token).get(endpoint);
-        setTheses(response.data);
-      } catch (ex) {
-        console.error(ex);
-        setTheses(null);
-      }
-    };
+  const loadTheses = async (currentPage, searchValue = "") => {
+    try {
+      let params = {
+        page: currentPage,
+        search: searchValue,
+      };
+      let endpoint = isActive
+        ? endpoints.activeTheses
+        : endpoints.notActiveTheses;
+      const response = await authAPIWithParams(token, params).get(endpoint);
 
-    loadTheses();
-  }, [isActive]);
+      setTheses(response.data.results);
+      return Math.ceil(response.data.count / 5);
+    } catch (ex) {
+      console.error(ex);
+      setTheses([]);
+    }
+  };
 
-  const onClickThesis = (thesisId, token) => {
+  // useEffect(() => {
+  //   loadTheses(1);
+  // }, [isActive]);
+
+  console.log(isActive);
+
+  const onClickItem = (thesis) => {
     navigation.navigate("ThesisPage", {
-      thesisId: thesisId,
+      thesis: thesis,
       token: token,
     });
   };
@@ -39,13 +49,19 @@ function ThesesPage({ route, navigation }) {
       <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
         <ButtonComponent
           outline
-          style={{ container: { marginBottom: -6 } }}
+          style={{ container: { marginBottom: -6, opacity: 1 } }}
           onClick={() => setIsActive((prev) => !prev)}
+          disabled={userInfo && userInfo.role !== "PROVOST"}
         >
           {isActive ? "Đã duyệt" : "Chưa duyệt"}
         </ButtonComponent>
       </View>
-      <Theses theses={theses} token={token} onClickThesis={onClickThesis} />
+      <Theses
+        theses={theses}
+        loadTheses={loadTheses}
+        onClickItem={onClickItem}
+        active={isActive}
+      />
     </DefaultLayout>
   );
 }

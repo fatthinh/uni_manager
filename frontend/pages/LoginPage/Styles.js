@@ -19,7 +19,7 @@ export const Line = () => {
 export default StyleSheet.create({
   container: {
     display: "flex",
-    height: SCREEN_HEIGHT,
+    height: SCREEN_HEIGHT + 120,
     backgroundColor: "#0c56d0",
     padding: 8,
   },

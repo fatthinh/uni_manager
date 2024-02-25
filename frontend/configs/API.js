@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseConfig = {
-  baseURL: "http://192.168.1.7:8000/api/",
+  baseURL: "http://192.168.1.42:8000/api/",
 };
 
 export const endpoints = {
@@ -12,6 +12,9 @@ export const endpoints = {
   notActiveTheses: "theses/not-active/",
   activeTheses: "theses/active/",
   thesis: (thesisId) => `theses/${thesisId}/`,
+  createThesis: `theses/create-thesis/`,
+  updateThesis: (thesisId) => `theses/${thesisId}/update-thesis/`,
+  uploadFile: (thesisId) => `theses/${thesisId}/upload-files/`,
   toggleThesis: (thesisId) => `theses/${thesisId}/toggle-active/`,
   myThesis: "theses/my-thesis/",
   thesisReivews: (thesisId) => `theses/${thesisId}/reviews/`,

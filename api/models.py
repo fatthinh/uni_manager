@@ -27,7 +27,7 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-
+# Thành viên hội đồng
 class CouncilMembership(models.Model):
     ROLES = (
         ('CHAIRMAN', 'chairman'),
@@ -48,7 +48,7 @@ class CouncilMembership(models.Model):
     class Meta:
         unique_together = ['user', 'council']
 
-
+# Hội đồng
 class Council(BaseModel):
     name = models.CharField(max_length=100, null=True)
     members = models.ManyToManyField(
@@ -60,10 +60,17 @@ class Council(BaseModel):
 
 
 class Thesis(BaseModel):
+    MAJORS = (
+        ('IT', 'Infomation Technology'),
+        ('CS', 'Computer Science'),
+        ('ENG', 'English Language'),
+        ('MKT', 'Marketing'),
+    )
     title = models.CharField(max_length=100)
     is_active = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     files = models.FileField(upload_to='theses/%Y/%m')
+    major = models.CharField(choices=MAJORS, max_length=200, null=True)
 
     council = models.ForeignKey(
         Council, related_name='theses', on_delete=models.SET_NULL, null=True, blank=True)

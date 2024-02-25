@@ -1,8 +1,4 @@
-import {
-  createDrawerNavigator,
-  DrawerItem,
-  DrawerItemList,
-} from "@react-navigation/drawer";
+import { createDrawerNavigator, DrawerItem } from "@react-navigation/drawer";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import HomePage from "./pages/HomePage";
@@ -13,18 +9,20 @@ import AccountPage from "./pages/AccountPage";
 import CreateAccountPage from "./pages/CreateAccountPage";
 import ThesesPage from "./pages/ThesesPage";
 import ThesisPage from "./pages/ThesisPage";
-import CreateThesisPage from "./pages/ThesisPage/CreateThesisPage";
 import CouncilsPage from "./pages/CouncilsPage";
-import CouncilPage from "./pages/CouncilPage";
 import store from "./redux/store";
 import { Provider, useSelector } from "react-redux";
 import MyThesis from "./pages/MyThesis";
-import CreateCouncilPage from "./pages/CouncilPage/CreateCouncilPage";
 import ReviewPage from "./pages/ReviewPage";
 import MyProfile from "./pages/AccountPage/MyProfile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LecturerCouncils from "./pages/Lecturer/LecturerCouncils";
 import LecturerTheses from "./pages/Lecturer/LecturerTheses";
+import PlotPage from "./pages/PlotPage";
+import MessagesPage from "./pages/MessagesPage";
+import InboxPage from "./pages/InboxPage";
+import MyThesisPage from "./pages/ThesisPage/MyThesisPage";
+import { ModalPortal } from "react-native-modals";
 
 const Drawer = createDrawerNavigator();
 
@@ -49,6 +47,11 @@ export default function App() {
       title: "Hội đồng của tôi",
     },
     {
+      name: "PlotPage",
+      component: PlotPage,
+      title: "Thống Kê",
+    },
+    {
       name: "LoginPage",
       component: LoginPage,
       options: { headerShown: false },
@@ -69,23 +72,13 @@ export default function App() {
       options: { headerShown: false },
     },
     {
-      name: "CreateThesisPage",
-      component: CreateThesisPage,
-      options: { headerShown: false },
-    },
-    {
-      name: "CouncilPage",
-      component: CouncilPage,
+      name: "MyThesisPage",
+      component: MyThesisPage,
       options: { headerShown: false },
     },
     {
       name: "LecturerTheses",
       component: LecturerTheses,
-      options: { headerShown: false },
-    },
-    {
-      name: "CreateCouncilPage",
-      component: CreateCouncilPage,
       options: { headerShown: false },
     },
     {
@@ -96,6 +89,17 @@ export default function App() {
     {
       name: "MyProfile",
       component: MyProfile,
+      options: { headerShown: false },
+    },
+
+    {
+      name: "MessagesPage",
+      component: MessagesPage,
+      options: { headerShown: false },
+    },
+    {
+      name: "InboxPage",
+      component: InboxPage,
       options: { headerShown: false },
     },
   ];
@@ -110,6 +114,11 @@ export default function App() {
             drawerStyle: {
               paddingTop: 50,
               backgroundColor: "#0c56d0",
+            },
+            headerStyle: {
+              height: 80,
+              borderBottomWidth: 1,
+              borderColor: "#ccc",
             },
           }}
           initialRouteName="LoginPage"
@@ -128,6 +137,7 @@ export default function App() {
           ))}
         </Drawer.Navigator>
       </NavigationContainer>
+      <ModalPortal />
     </Provider>
   );
 }
@@ -164,6 +174,11 @@ const MyDrawerItem = () => {
       label: "Hội đồng của tôi",
       screen: "LecturerCouncils",
       condition: userInfo?.role === "LECTURER",
+    },
+    {
+      label: "Thống Kê",
+      screen: "PlotPage",
+      condition: userInfo,
     },
   ];
 

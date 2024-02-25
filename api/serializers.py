@@ -29,17 +29,12 @@ class UserSerializer(serializers.ModelSerializer):
 class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'get_full_name', 'role']
-
-
-class PublicCouncilsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Council
-        fields = ['id', 'name', 'is_active']
+        fields = ['id', 'get_full_name', 'role', 'avatar']
 
 
 class CouncilSerializer(serializers.ModelSerializer):
-    members = PublicUserSerializer(many=True)
+    members = PublicUserSerializer(many=True, read_only=True)
+
     class Meta:
         model = Council
         fields = ('__all__')
@@ -58,11 +53,23 @@ class MembershipSerializer(serializers.ModelSerializer):
 class ThesisSerializer(serializers.ModelSerializer):
     students = PublicUserSerializer(many=True)
     supervisors = PublicUserSerializer(many=True)
-    council = PublicCouncilsSerializer()
+    council = serializers.SerializerMethodField()
+    files = serializers.SerializerMethodField()
 
     class Meta:
         model = Thesis
         fields = ('__all__')
+
+    def get_files(self, obj):
+        request = self.context.get('request')
+        if request is not None and obj.files:
+            return request.build_absolute_uri(f'/static/{obj.files}')
+        return f'/static/{obj.files}'
+
+    def get_council(self, obj):
+        council_data = CouncilSerializer(obj.council).data
+        council_data.pop('members', None)
+        return council_data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -70,6 +77,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         source='reviewer.first_name', read_only=True)
     author_lastname = serializers.CharField(
         source='reviewer.last_name', read_only=True)
+    author_email = serializers.CharField(
+        source='reviewer.email', read_only=True)
 
     class Meta:
         model = Review

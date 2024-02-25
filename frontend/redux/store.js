@@ -2,17 +2,13 @@ import { createStore, combineReducers, applyMiddleware } from "redux";
 import { thunk } from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { userLoginReducer } from "./reducers/userReducers";
-import {
-  loadCouncilsNameReducer,
-  loadLecturersNameReducer,
-  loadStudentsNameReducer,
-} from "./reducers/loadPublicReducers";
+import { loadLecturersNameReducer } from "./reducers/loadPublicReducers";
+import { openSearchReducer } from "./reducers/openSearchReducer";
 
 const reducer = combineReducers({
   userLogin: userLoginReducer,
-  studentsInfo: loadStudentsNameReducer,
   lecturersInfo: loadLecturersNameReducer,
-  councilsInfo: loadCouncilsNameReducer,
+  searchModalVisible: openSearchReducer,
 });
 
 const store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));

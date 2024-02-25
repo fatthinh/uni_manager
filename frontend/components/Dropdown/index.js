@@ -25,7 +25,7 @@ function DropdownComponent({
         valueField="value"
         value={value}
         placeholder={
-          value ? data.find((item) => item.value === value).label : "Chọn..."
+          value ? data.find((item) => item.value === value)?.label : "Chọn..."
         }
         onChange={(item) => onChange(item.value)}
         search={data.length > 5}

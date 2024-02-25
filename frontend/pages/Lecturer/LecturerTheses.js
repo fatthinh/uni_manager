@@ -1,28 +1,38 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Text, View, ActivityIndicator } from "react-native";
-import { authAPIWithoutParams, endpoints } from "../../configs/API";
+import {
+  authAPIWithoutParams,
+  authAPIWithParams,
+  endpoints,
+} from "../../configs/API";
 import DetailLayout from "../../layouts/DetailLayout";
 import Theses from "../ThesesPage/Theses";
 
 function LecturerTheses({ route, navigation }) {
-  const [theses, setTheses] = useState(null);
-  const { councilId, token } = route.params;
+  const [theses, setTheses] = useState([]);
+  const { token, councilId } = route.params;
 
-  useEffect(() => {
-    const loadTheses = async () => {
+  const loadTheses = async () => {
+    try {
       let response = await authAPIWithoutParams(token).get(
         endpoints.lecturerTheses(councilId)
       );
       setTheses(response.data);
-    };
+      return 1;
+    } catch (ex) {
+      console.error(ex);
+      setTheses([]);
+    }
+  };
 
-    loadTheses();
+  useEffect(() => {
+    loadTheses(1);
   }, [councilId]);
 
-  const onClickThesis = (thesisId, token) => {
+  const onClickItem = (thesis) => {
     navigation.navigate("ThesisPage", {
-      thesisId: thesisId,
+      thesis: thesis,
       token: token,
     });
   };
@@ -34,13 +44,11 @@ function LecturerTheses({ route, navigation }) {
         navigation.navigate("LecturerCouncils", { token: token })
       }
     >
-      {theses === null ? (
-        <ActivityIndicator />
-      ) : (
-        <View style={{ width: "100%" }}>
-          <Theses theses={theses} token={token} onClickThesis={onClickThesis} />
-        </View>
-      )}
+      <Theses
+        theses={theses}
+        loadTheses={loadTheses}
+        onClickItem={onClickItem}
+      />
     </DetailLayout>
   );
 }

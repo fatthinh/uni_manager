@@ -1,195 +1,477 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Dimensions, Linking, StyleSheet, Text, View } from "react-native";
 import DefaultLayout from "../../layouts/DefaultLayout";
 import ButtonComponent from "../../components/ButtonComponent";
-import InputBox from "../../components/InputBox";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { createContext, useContext, useEffect, useState } from "react";
+import ModalComponent from "../../components/ModalComponent";
+import InputBox from "../../components/InputBox";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import DropdownComponent from "../../components/Dropdown";
+import { useDispatch, useSelector } from "react-redux";
+import MultiSelectComponent from "../../components/MultiSelectComponent";
+import * as DocumentPicker from "expo-document-picker";
+import {
+  faArrowLeft,
+  faArrowRight,
+  faPen,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { openSearchModal } from "../../redux/actions/openSearchModal";
 
-function MyThesis({ navigation }) {
-  const [thesis, setThesis] = useState(null);
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const MAJORS = [
+  { value: "IT", label: "Infomation Technology" },
+  { value: "CS", label: "Computer Science" },
+  { value: "ENG", label: "English Language" },
+  { value: "MKT", label: "Marketing" },
+];
+const ThesisContext = createContext();
+
+function MyThesis({ navigation, route }) {
+  const { token } = route.params;
+  const updated = route.params?.updated;
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [thesisModalVisible, setThesisModalVisible] = useState(false);
   const { userInfo } = useSelector((state) => state.userLogin);
+  const [thesis, setThesis] = useState({});
+  const [file, setFile] = useState(null);
+
+  const loadThesis = async () => {
+    try {
+      let response = await authAPIWithoutParams(token).get(endpoints.myThesis);
+      let data = response.data;
+      setThesis({
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        supervisors: data.supervisors.map((supervisor) => supervisor.id),
+        partner: data.students.find((student) => student.id !== userInfo.id),
+        major: data.major,
+      });
+      setFile({
+        name: data.files.split("/").pop(),
+        uri: `http://192.168.1.42:8000${data.files}`,
+      });
+    } catch (error) {
+      setThesis({
+        title: "",
+        description: "",
+        supervisors: [],
+        partner: null,
+        major: "",
+      });
+      setFile(null);
+    }
+  };
+
+  const uploadFile = async (data, thesisId) => {
+    const formData = new FormData();
+    formData.append("files", data);
+    await authAPIWithoutParams(token).patch(
+      endpoints.uploadFile(thesisId),
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  };
+
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync();
+
+      const { assets, canceled } = result;
+
+      if (!canceled) {
+        const { mimeType, name, uri } = assets[0];
+        const data = { uri: uri, type: mimeType, name: name };
+        if (thesis.id) {
+          uploadFile(data, thesis.id);
+        }
+        setFile(data);
+      } else {
+        console.log("Document picker cancelled.");
+      }
+    } catch (err) {
+      console.error("Error picking document:", err);
+    }
+  };
+
+  const createThesis = async () => {
+    let data = {
+      ...thesis,
+      students: thesis.partner ? [thesis.partner, userInfo.id] : [userInfo.id],
+    };
+    try {
+      let response = await authAPIWithoutParams(token).post(
+        endpoints.createThesis,
+        data
+      );
+      uploadFile(file, response.data.id);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loadThesis();
+      setCreateModalVisible(false);
+    }
+  };
+
+  const updateThesis = async () => {
+    let data = {
+      ...thesis,
+      students: thesis.partner ? [thesis.partner, userInfo.id] : [userInfo.id],
+    };
+    try {
+      await authAPIWithoutParams(token).patch(
+        endpoints.updateThesis(thesis.id),
+        data
+      );
+      setThesisModalVisible(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onChangeDetail = (key, value) => {
+    setThesis((prev) => {
+      return {
+        ...prev,
+        [key]: value,
+      };
+    });
+  };
 
   useEffect(() => {
-    const loadThesis = async () => {
-      let accessToken = await AsyncStorage.getItem("access-token");
-      let response = await authAPIWithoutParams(accessToken).get(
-        endpoints.myThesis
-      );
-      setThesis(response.data);
-    };
-
     loadThesis();
-  }, [userInfo]);
-
-  console.log(thesis);
+  }, [token, updated]);
 
   return (
-    <DefaultLayout>
-      {!thesis ? (
-        <>
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+    <>
+      <DefaultLayout>
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {thesis.id ? (
+            <Text>{thesis.title}</Text>
+          ) : (
             <Text>Bạn chưa có khóa luận!!!</Text>
-            <ButtonComponent
-              rounded
-              style={{
-                container: { width: 200, marginTop: 20 },
-                textColor: { fontSize: 24 },
-              }}
-              onClick={() => navigation.navigate("CreateThesisPage")}
-            >
-              Tạo
-            </ButtonComponent>
-          </View>
-        </>
-      ) : (
-        <>
-          <ThesisDetail thesis={thesis} />
-        </>
-      )}
-    </DefaultLayout>
+          )}
+          <ButtonComponent
+            rounded
+            style={{
+              container: { width: 200, marginTop: 20 },
+              textColor: { fontSize: 24 },
+            }}
+            onClick={
+              thesis.id
+                ? () => setThesisModalVisible(true)
+                : () => setCreateModalVisible(true)
+            }
+          >
+            {thesis.id ? "Xem chi tiết" : "Tạo"}
+          </ButtonComponent>
+        </View>
+      </DefaultLayout>
+
+      <ThesisContext.Provider
+        value={{
+          thesis,
+          loadThesis,
+          onChangeDetail,
+          file,
+          pickDocument,
+          createThesis,
+          setThesis,
+          setFile,
+          updateThesis,
+        }}
+      >
+        <CreateModal
+          visible={createModalVisible}
+          unVisible={() => setCreateModalVisible(false)}
+        />
+        <ThesisModal
+          visible={thesisModalVisible}
+          unVisible={() => setThesisModalVisible(false)}
+        />
+      </ThesisContext.Provider>
+    </>
   );
 }
 
-const ThesisDetail = ({ thesis }) => {
+const CreateModal = ({ visible, unVisible }) => {
+  const {
+    file,
+    setFile,
+    thesis,
+    setThesis,
+    createThesis,
+    pickDocument,
+    onChangeDetail,
+  } = useContext(ThesisContext);
+
   return (
-    <>
-      <Text style={styles.title}>{thesis.title}</Text>
-      <View style={styles.status}>
-        <Text>Trạng thái: </Text>
-        <Text style={{ color: "red" }}>
-          {thesis.is_active ? "Đã duyệt" : "Chờ"}
-        </Text>
-      </View>
-      <View style={{ width: "100%" }}>
-        <InputBox
-          multiline
-          disabled
-          value={thesis.description}
-          label="Description"
-          style={{
-            inputBox: {
-              width: "100%",
-              height: 100,
-              justifyContent: "flex-start",
-            },
-            input: {
-              width: "100%",
-              maxHeight: 100,
-              marginVertical: 10,
-            },
-            label: {
-              fontWeight: "500",
-            },
-          }}
+    <ModalComponent
+      content={
+        <Content
+          thesis={thesis}
+          onChangeDetail={onChangeDetail}
+          file={file}
+          pickDocument={pickDocument}
+          createThesis={createThesis}
         />
-      </View>
-      <View style={styles.filesField}>
-        <Text style={{ fontSize: 18 }}>Files: </Text>
-        <Text
-          style={{
-            borderColor: "#000",
-            borderWidth: 1,
-            width: 280,
-            padding: 14,
-          }}
-        >
-          {thesis.files}
-        </Text>
-      </View>
-      <View style={styles.row}>
-        {/* <Text style={{ fontSize: 18, marginRight: 20 }}>
-          Hội đồng đánh giá:
-        </Text>
-        {councils === null || thesis === null ? (
-          <ActivityIndicator />
-        ) : (
-          <>
-            <Text style={{ fontSize: 16 }}>
-              {councils.find((council) => council.id === thesis.council).name}
-            </Text>
-          </>
-        )} */}
-      </View>
-      <View style={styles.row}>
-        <Text style={{ fontSize: 18, marginRight: 20 }}>
-          Sinh viên thực hiện:
-        </Text>
-        <View style={{ marginTop: 2 }}>
-          {/* {users === null || thesis === null ? (
-            <ActivityIndicator />
-          ) : (
-            <>
-              {thesis.students.map((studentId) => {
-                let matchStudent = users.find((user) => user.id === studentId);
-                return (
-                  <Text style={{ fontSize: 16 }} key={studentId}>
-                    {matchStudent.get_full_name}
-                  </Text>
-                );
-              })}
-            </>
-          )} */}
-        </View>
-      </View>
-      <View style={styles.row}>
-        <Text style={{ fontSize: 18, marginRight: 20 }}>
-          Giảng viên hướng dẫn:
-        </Text>
-        <View style={{ marginTop: 2 }}>
-          {/* {users === null || thesis === null ? (
-            <ActivityIndicator />
-          ) : (
-            <>
-              {thesis.supervisors.map((supervisorId) => {
-                let matchStudent = users.find(
-                  (user) => user.id === supervisorId
-                );
-                return (
-                  <Text style={{ fontSize: 16 }} key={supervisorId}>
-                    {matchStudent.get_full_name}
-                  </Text>
-                );
-              })}
-            </>
-          )} */}
-        </View>
-      </View>
-    </>
+      }
+      title="Tạo khóa luận"
+      unVisible={() => {
+        unVisible();
+        setThesis({
+          title: "",
+          description: "",
+          supervisors: [],
+          partner: null,
+          major: "",
+        });
+        setFile(null);
+      }}
+      visible={visible}
+    />
   );
 };
 
-const styles = StyleSheet.create({
-  title: { fontSize: 26, fontWeight: "600" },
-  status: { flexDirection: "row", alignItems: "center" },
-  filesField: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 20,
-    position: "relative",
-    paddingHorizontal: 10,
-  },
-  fileText: {
-    borderColor: "#000",
-    borderWidth: 1,
-    width: 280,
-    padding: 14,
-  },
-  row: {
-    width: "100%",
-    flexDirection: "row",
-    height: 46,
-    marginTop: 10,
-  },
-});
+const Content = ({
+  thesis,
+  onChangeDetail,
+  pickDocument,
+  file,
+  createThesis,
+  updateThesis,
+}) => {
+  const dispatch = useDispatch();
+
+  const openFile = (fileUrl) => {
+    console.log(fileUrl);
+    Linking.canOpenURL(fileUrl).then((supported) => {
+      if (supported) {
+        Linking.openURL(fileUrl);
+      } else {
+        console.error("Don't know how to open URI: ", fileUrl);
+      }
+    });
+  };
+
+  const [current, setCurrent] = useState(0);
+  const { lecturers } = useSelector((state) => state.lecturersInfo);
+  const fields = [
+    { field: "title", fieldName: "" },
+    { field: "major", fieldName: "Ngành" },
+    { field: "description", fieldName: "Mô tả" },
+    { field: "files", fieldName: "Files" },
+    { field: "partner", fieldName: "Sinh viên khác" },
+    { field: "supervisors", fieldName: "Giảng viên hướng dẫn" },
+  ];
+
+  const [error, setError] = useState(false);
+
+  return (
+    <View
+      style={{
+        width: SCREEN_WIDTH * 0.8,
+        marginTop: 20,
+      }}
+    >
+      <View style={{}}>
+        {current === 0 && (
+          <InputBox
+            value={thesis?.title}
+            onChange={(value) => onChangeDetail("title", value)}
+            style={{ inputBox: { width: "100%" } }}
+            label="Tên"
+          />
+        )}
+        {current === 1 && (
+          <DropdownComponent
+            data={MAJORS}
+            onChange={(value) => onChangeDetail("major", value)}
+            style={{ dropdownContainer: { width: "100%" } }}
+            value={thesis?.major}
+          />
+        )}
+        {current === 2 && (
+          <InputBox
+            multiline
+            value={thesis?.description}
+            label="Description"
+            onChange={(value) => onChangeDetail("description", value)}
+            style={{
+              inputBox: {
+                width: "100%",
+                height: 100,
+              },
+              input: {
+                width: "100%",
+                marginVertical: 10,
+              },
+              label: {
+                fontWeight: "500",
+              },
+            }}
+          />
+        )}
+        {current === 3 && (
+          <ButtonComponent
+            style={{
+              container: {
+                width: "100%",
+                height: 60,
+              },
+            }}
+            primary
+            onClick={pickDocument}
+          >
+            Chọn
+          </ButtonComponent>
+        )}
+        {current === 4 && (
+          <ButtonComponent
+            rounded
+            onClick={() =>
+              dispatch(
+                openSearchModal("student", (value) =>
+                  onChangeDetail("partner", value.id)
+                )
+              )
+            }
+          >
+            {thesis.partner ? "Chọn lại..." : "Chọn..."}
+          </ButtonComponent>
+        )}
+
+        {current === 5 && (
+          <View style={{ width: "100%", marginTop: 20 }}>
+            <MultiSelectComponent
+              data={lecturers}
+              onChangeSelected={(value) => onChangeDetail("supervisors", value)}
+              selected={thesis?.supervisors}
+              placeholder="Chọn..."
+              maxSelect={2}
+              hide={!thesis.supervisors}
+            />
+          </View>
+        )}
+      </View>
+
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: current === 0 ? "center" : "space-between",
+          marginTop: 20,
+          alignItems: "center",
+        }}
+      >
+        {current !== 0 && (
+          <ButtonComponent
+            onClick={() => {
+              setCurrent((prev) => prev - 1);
+              setError(false);
+            }}
+            style={{ container: { height: 50 } }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </ButtonComponent>
+        )}
+        {current !== 0 &&
+          (fields[current].field === "files" ? (
+            <ButtonComponent
+              onClick={() => openFile(file?.uri)}
+              disabled={!file}
+              style={{ container: { width: 180 } }}
+            >
+              {file ? file.name : fields[current].fieldName}
+            </ButtonComponent>
+          ) : (
+            <Text style={{ fontSize: 16, width: 100, textAlign: "center" }}>
+              {fields[current].fieldName}
+            </Text>
+          ))}
+        {current !== 5 ? (
+          <ButtonComponent
+            onClick={() => {
+              let thesisField =
+                fields[current].field === "files"
+                  ? file
+                  : thesis[fields[current].field];
+              if (thesisField || current == 4) {
+                setError(false);
+                setCurrent((prev) => prev + 1);
+              } else setError(true);
+            }}
+            style={{ container: { height: 50 } }}
+          >
+            <FontAwesomeIcon icon={faArrowRight} />
+          </ButtonComponent>
+        ) : createThesis ? (
+          <ButtonComponent
+            onClick={() => {
+              if (thesis[fields[current].field].length) {
+                createThesis();
+                setError(false);
+              } else setError(true);
+            }}
+            style={{ container: { height: 50 } }}
+          >
+            <FontAwesomeIcon icon={faPlus} />
+          </ButtonComponent>
+        ) : (
+          <ButtonComponent
+            onClick={() => {
+              if (thesis[fields[current].field].length) {
+                updateThesis();
+                setError(false);
+              } else setError(true);
+            }}
+            style={{ container: { height: 50 } }}
+          >
+            <FontAwesomeIcon icon={faPen} />
+          </ButtonComponent>
+        )}
+      </View>
+      {error && <Text style={{ color: "red" }}>Nhập thông tin!!!</Text>}
+    </View>
+  );
+};
+
+const ThesisModal = ({ visible, unVisible }) => {
+  const { file, thesis, updateThesis, pickDocument, onChangeDetail } =
+    useContext(ThesisContext);
+
+  return (
+    <ModalComponent
+      content={
+        <Content
+          thesis={thesis}
+          onChangeDetail={onChangeDetail}
+          file={file}
+          pickDocument={pickDocument}
+          updateThesis={() => {
+            updateThesis();
+            unVisible();
+          }}
+        />
+      }
+      title="Chi tiết"
+      unVisible={unVisible}
+      visible={visible}
+    />
+  );
+};
+
+const styles = StyleSheet.create({});
 
 export default MyThesis;

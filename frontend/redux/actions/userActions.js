@@ -1,8 +1,7 @@
-import axios, { Axios } from "axios";
+import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
-  LOAD_PUBLIC_USER_INFO,
   USER_LOGIN_FAIL,
   USER_LOGIN_REQUEST,
   USER_LOGIN_SUCCESS,
@@ -32,7 +31,7 @@ export const login = (username, password) => async (dispatch) => {
     };
 
     const { data } = await axios.post(
-      "http://192.168.1.7:8000/o/token/",
+      "http://192.168.1.42:8000/o/token/",
       loginData
     );
 
@@ -58,4 +57,3 @@ export const logout = () => async (dispatch) => {
   await AsyncStorage.removeItem("access-token");
   dispatch({ type: USER_LOGOUT });
 };
-

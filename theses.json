@@ -1,0 +1,304 @@
+[
+  {
+    "title": "The Impact of Artificial Intelligence on Business",
+    "major": "Business Administration",
+    "description": "This thesis explores the influence of AI on various aspects of business operations.",
+    "students": [1, 2],
+    "supervisors": [3, 4]
+  },
+  {
+    "title": "Advancements in Quantum Computing",
+    "major": "Computer Science",
+    "description": "A comprehensive study on the recent developments in the field of quantum computing.",
+    "students": [5, 6],
+    "supervisors": [7, 8]
+  },
+  {
+    "title": "Environmental Sustainability Practices in Corporate Organizations",
+    "major": "Environmental Science",
+    "description": "Examining how companies are adopting sustainable practices to reduce their environmental impact.",
+    "students": [9, 10],
+    "supervisors": [11, 12]
+  },
+  {
+    "title": "The Role of Renewable Energy in Mitigating Climate Change",
+    "major": "Environmental Engineering",
+    "description": "Analyzing the effectiveness of renewable energy sources in reducing carbon emissions.",
+    "students": [13, 14],
+    "supervisors": [15, 16]
+  },
+  {
+    "title": "Applications of Machine Learning in Healthcare",
+    "major": "Biomedical Engineering",
+    "description": "Exploring the use of machine learning algorithms to enhance healthcare services.",
+    "students": [17, 18],
+    "supervisors": [19, 20]
+  },
+  {
+    "title": "Cultural Impacts of Globalization on Indigenous Communities",
+    "major": "Anthropology",
+    "description": "Investigating how globalization affects the cultural identity of indigenous communities.",
+    "students": [21, 22],
+    "supervisors": [23, 24]
+  },
+  {
+    "title": "Cybersecurity Threats and Countermeasures",
+    "major": "Information Technology",
+    "description": "A comprehensive study on the evolving landscape of cybersecurity threats and prevention strategies.",
+    "students": [25, 26],
+    "supervisors": [27, 28]
+  },
+  {
+    //////
+    "title": "The Impact of Social Media on Political Movements",
+    "major": "Political Science",
+    "description": "Examining the role of social media platforms in shaping political activism and movements.",
+    "students": [29, 30],
+    "supervisors": [31, 32]
+  },
+  {
+    "title": "Advancements in Robotics and Automation",
+    "major": "Mechanical Engineering",
+    "description": "Investigating recent developments in robotics and their applications in industrial automation.",
+    "students": [33, 34],
+    "supervisors": [35, 36]
+  },
+  {
+    "title": "Effects of Exercise on Mental Health",
+    "major": "Psychology",
+    "description": "A study on how regular exercise impacts mental well-being and cognitive functions.",
+    "students": [37, 38],
+    "supervisors": [39, 40]
+  },
+  {
+    "title": "Urbanization and Its Environmental Consequences",
+    "major": "Urban Planning",
+    "description": "Analyzing the environmental challenges associated with rapid urbanization.",
+    "students": [41, 42],
+    "supervisors": [43, 44]
+  },
+  {
+    "title": "The Evolution of Virtual Reality in Education",
+    "major": "Education Technology",
+    "description": "Exploring the use of virtual reality technology to enhance educational experiences.",
+    "students": [45, 46],
+    "supervisors": [47, 48]
+  },
+  {
+    "title": "Economic Impacts of Global Pandemics",
+    "major": "Economics",
+    "description": "Examining the economic consequences of global pandemics and the effectiveness of mitigation strategies.",
+    "students": [49, 50],
+    "supervisors": [51, 52]
+  },
+  {
+    "title": "The Intersection of Art and Technology in the Digital Age",
+    "major": "Digital Arts",
+    "description": "Exploring the fusion of artistic expression and technological innovation in contemporary digital art.",
+    "students": [53, 54],
+    "supervisors": [55, 56]
+  },
+  {
+    "title": "Challenges and Opportunities in the Space Industry",
+    "major": "Aerospace Engineering",
+    "description": "Investigating the current challenges and future possibilities in the rapidly evolving space industry.",
+    "students": [57, 58],
+    "supervisors": [59, 60]
+  },
+  {
+    "title": "The Psychology of Consumer Behavior in E-commerce",
+    "major": "Marketing",
+    "description": "Analyzing the psychological factors influencing consumer decisions in online shopping.",
+    "students": [61, 62],
+    "supervisors": [63, 64]
+  },
+  {
+    "title": "Biodiversity Conservation Strategies in Urban Environments",
+    "major": "Environmental Science",
+    "description": "Examining effective strategies for preserving biodiversity in urban settings.",
+    "students": [65, 66],
+    "supervisors": [67, 68]
+  },
+  {
+    "title": "Impact of Social Networks on Personal Relationships",
+    "major": "Sociology",
+    "description": "Investigating the effects of social networking platforms on the dynamics of personal relationships.",
+    "students": [69, 70],
+    "supervisors": [71, 72]
+  },
+  {
+    "title": "Innovations in Sustainable Agriculture",
+    "major": "Agricultural Science",
+    "description": "A study on technological innovations promoting sustainability in modern agriculture.",
+    "students": [73, 74],
+    "supervisors": [75, 76]
+  },
+  {
+    "title": "The Role of Women in Leadership Positions",
+    "major": "Gender Studies",
+    "description": "Analyzing the challenges and successes of women in leadership roles across various industries.",
+    "students": [77, 78],
+    "supervisors": [79, 80]
+  },
+  {
+    "title": "Enhancing Data Security in Cloud Computing",
+    "major": "Information Security",
+    "description": "Examining methods to improve data security in cloud-based systems and services.",
+    "students": [81, 82],
+    "supervisors": [83, 84]
+  },
+  {
+    "title": "Psychological Effects of Virtual Reality Gaming",
+    "major": "Psychology",
+    "description": "Investigating the psychological impacts of immersive virtual reality experiences in gaming.",
+    "students": [85, 86],
+    "supervisors": [87, 88]
+  },
+  {
+    "title": "Sustainable Urban Transportation Planning",
+    "major": "Urban Planning",
+    "description": "Analyzing strategies to promote sustainable and efficient transportation systems in urban areas.",
+    "students": [89, 90],
+    "supervisors": [91, 92]
+  },
+  {
+    "title": "Impact of Music Therapy on Mental Health",
+    "major": "Music Therapy",
+    "description": "Examining the therapeutic effects of music on individuals with mental health conditions.",
+    "students": [93, 94],
+    "supervisors": [95, 96]
+  },
+  {
+    "title": "Green Building Technologies for Sustainable Architecture",
+    "major": "Architecture",
+    "description": "Investigating technologies and design principles for eco-friendly and sustainable buildings.",
+    "students": [97, 98],
+    "supervisors": [99, 100]
+  },
+  {
+    "title": "Economic Impacts of Cryptocurrencies",
+    "major": "Finance",
+    "description": "Analyzing the economic implications of the adoption and use of cryptocurrencies in financial systems.",
+    "students": [101, 102],
+    "supervisors": [103, 104]
+  },
+  {
+    "title": "The Role of Artificial Intelligence in Drug Discovery",
+    "major": "Pharmaceutical Sciences",
+    "description": "Exploring the applications of AI in the process of drug discovery and development.",
+    "students": [105, 106],
+    "supervisors": [107, 108]
+  },
+  {
+    "title": "Cultural Representations in Contemporary Literature",
+    "major": "Literature",
+    "description": "Examining how contemporary literature reflects and shapes cultural perceptions and identities.",
+    "students": [109, 110],
+    "supervisors": [111, 112]
+  },
+  {
+    "title": "Impacts of Social Media Influencers on Consumer Behavior",
+    "major": "Marketing",
+    "description": "Analyzing the influence of social media influencers on consumer purchasing decisions.",
+    "students": [113, 114],
+    "supervisors": [115, 116]
+  },
+  {
+    "title": "Developments in Augmented Reality for Education",
+    "major": "Education Technology",
+    "description": "Investigating the use of augmented reality technologies to enhance educational practices.",
+    "students": [117, 118],
+    "supervisors": [119, 120]
+  },
+  {
+    "title": "Ethical Considerations in Artificial Intelligence Research",
+    "major": "Ethics",
+    "description": "Examining ethical challenges and considerations in the field of artificial intelligence research.",
+    "students": [121, 122],
+    "supervisors": [123, 124]
+  },
+  {
+    "title": "The Impact of Virtual Teams on Organizational Productivity",
+    "major": "Business Management",
+    "description": "Analyzing the effects of virtual teams on communication, collaboration, and productivity in organizations.",
+    "students": [125, 126],
+    "supervisors": [127, 128]
+  },
+  {
+    "title": "Challenges and Opportunities in Global Supply Chain Management",
+    "major": "Logistics",
+    "description": "Investigating the complexities and potential improvements in managing global supply chains.",
+    "students": [129, 130],
+    "supervisors": [131, 132]
+  },
+  {
+    "title": "Innovations in Renewable Energy Storage Technologies",
+    "major": "Energy Engineering",
+    "description": "Examining cutting-edge technologies for storing energy from renewable sources.",
+    "students": [133, 134],
+    "supervisors": [135, 136]
+  },
+  {
+    "title": "Social Impacts of Online Learning Platforms",
+    "major": "Education",
+    "description": "Analyzing the effects of online learning platforms on social interactions and educational outcomes.",
+    "students": [137, 138],
+    "supervisors": [139, 140]
+  },
+  {
+    "title": "Cognitive Neuroscience and Memory Formation",
+    "major": "Neuroscience",
+    "description": "Investigating the neural processes involved in memory formation and retrieval.",
+    "students": [141, 142],
+    "supervisors": [143, 144]
+  },
+  {
+    "title": "Role of Artificial Intelligence in Personalized Medicine",
+    "major": "Biomedical Engineering",
+    "description": "Exploring AI applications in tailoring medical treatments to individual patient characteristics.",
+    "students": [145, 146],
+    "supervisors": [147, 148]
+  },
+  {
+    "title": "Societal Implications of Biotechnology Advancements",
+    "major": "Biotechnology",
+    "description": "Examining the societal, ethical, and legal considerations related to advancements in biotechnology.",
+    "students": [149, 150],
+    "supervisors": [151, 152]
+  },
+  {
+    "title": "The Role of Big Data in Financial Forecasting",
+    "major": "Data Science",
+    "description": "Analyzing the use of big data analytics in predicting financial market trends and outcomes.",
+    "students": [153, 154],
+    "supervisors": [155, 156]
+  },
+  {
+    "title": "Mental Health Advocacy in the Workplace",
+    "major": "Human Resources",
+    "description": "Investigating strategies for promoting mental health awareness and support in the workplace.",
+    "students": [157, 158],
+    "supervisors": [159, 160]
+  },
+  {
+    "title": "Blockchain Technology and Its Applications Beyond Cryptocurrency",
+    "major": "Computer Science",
+    "description": "Exploring various non-financial applications of blockchain technology.",
+    "students": [161, 162],
+    "supervisors": [163, 164]
+  },
+  {
+    "title": "Cultural Preservation in the Digital Age",
+    "major": "Cultural Heritage Management",
+    "description": "Examining strategies to digitally preserve and promote cultural heritage in the modern era.",
+    "students": [165, 166],
+    "supervisors": [167, 168]
+  },
+  {
+    "title": "Impacts of Climate Change on Global Food Security",
+    "major": "Environmental Science",
+    "description": "Analyzing the effects of climate change on agricultural practices and food supply chains.",
+    "students": [169, 170],
+    "supervisors": [171, 172]
+  }
+]

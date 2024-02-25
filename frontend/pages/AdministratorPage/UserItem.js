@@ -18,10 +18,10 @@ function UserItem({ user, onPress, style: customStyles }) {
       >
         <Text style={{ flex: 1 }}>{user.id}</Text>
         <Text style={{ flex: 3 }}>{user.username}</Text>
-        <Text style={{ flex: 4 }}>
+        <Text style={{ flex: 3.5 }}>
           {user.first_name} {user.last_name}
         </Text>
-        <Text style={{ flex: 2 }}>{user.role}</Text>
+        <Text style={{ flex: 3 }}>{user.role}</Text>
       </View>
     </TouchableOpacity>
   );

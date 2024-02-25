@@ -1,17 +1,27 @@
 import { faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, ActivityIndicator } from "react-native";
 import InputBox from "../../components/InputBox";
+import PaginationComponent from "../../components/PaginationComponent";
 import CouncilItem from "../CouncilsPage/CouncilItem";
 
-const CouncilItems = ({ councils, onClickItem }) => {
-  const [searchValue, setSearchValue] = useState(null);
+const CouncilItems = ({ onClickItem, councils, loadCouncils }) => {
+  const [searchValue, setSearchValue] = useState("");
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const handleSearch = (value) => {
     setSearchValue(value);
+    setCurrentPage(1);
   };
-  const navigation = useNavigation();
+
+  useEffect(() => {
+    loadCouncils(currentPage, searchValue).then((value) =>
+      setTotalPages(value)
+    );
+  }, [searchValue, currentPage]);
 
   return (
     <>
@@ -29,11 +39,10 @@ const CouncilItems = ({ councils, onClickItem }) => {
           input: {},
         }}
       />
-      <View style={{}}>
+      <View>
         <View
           style={{
             flexDirection: "row",
-            marginTop: 12,
             paddingHorizontal: 8,
             paddingVertical: 14,
             backgroundColor: "#0c56d0",
@@ -44,22 +53,21 @@ const CouncilItems = ({ councils, onClickItem }) => {
           <Text style={{ flex: 3 }}>Ngày tạo</Text>
           <Text style={{ flex: 3 }}>Trạng thái</Text>
         </View>
-        <View>
-          {councils === null ? (
-            <ActivityIndicator />
-          ) : (
-            <>
-              {councils.map((council) => (
-                <CouncilItem
-                  council={council}
-                  key={council.id}
-                  style={{ container: { borderColor: "#0c56d0" } }}
-                  onPress={() => onClickItem(council.id)}
-                />
-              ))}
-            </>
-          )}
+        <View style={{ height: 446 }}>
+          {councils.map((council) => (
+            <CouncilItem
+              council={council}
+              key={council.id}
+              style={{ container: { borderColor: "#0c56d0" } }}
+              onPress={() => onClickItem(council)}
+            />
+          ))}
         </View>
+        <PaginationComponent
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+          currentPage={currentPage}
+        />
       </View>
     </>
   );

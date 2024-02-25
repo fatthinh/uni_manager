@@ -1,147 +1,168 @@
-import { faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useMemo, useState } from "react";
+import { Text, View, TextInput, Alert, Dimensions } from "react-native";
+import { useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent";
-import InputBox from "../../components/InputBox";
-import API, { authAPIWithoutParams, endpoints } from "../../configs/API";
+import {
+  authAPIWithoutParams,
+  authAPIWithParams,
+  endpoints,
+} from "../../configs/API";
 import DefaultLayout from "../../layouts/DefaultLayout";
-import CouncilItem from "./CouncilItem";
+import ModalComponent from "../../components/ModalComponent";
+import CouncilItems from "./CouncilItems";
+import CouncilDetail from "./CouncilDetail";
 
-function CouncilsPage({ route, navigation }) {
-  const { token, updated } = route.params;
-  const [searchValue, setSearchValue] = useState(null);
-  const [councils, setCouncils] = useState(null);
-  const [dropdownTheses, setDropdownTheses] = useState(null);
-  const dropdownLecturers = useSelector((state) => state.lecturersInfo);
-  const { lecturers } = dropdownLecturers;
+const SCREEN_WIDTH = Dimensions.get("window").width;
 
-  const handleSearch = (value) => {
-    setSearchValue(value);
-  };
+function CouncilsPage({ route }) {
+  const { userInfo } = useSelector((state) => state.userLogin);
+  const token = useMemo(() => route.params?.token, [userInfo]);
+  // council list
+  const [councils, setCouncils] = useState([]);
 
-  const loadDropdownTheses = async () => {
+  // use for council detail
+  const [council, setCouncil] = useState({});
+  const [councilModalVisible, setCouncilModalVisible] = useState(false);
+
+  // create council modal
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const loadCouncils = async (currentPage, searchValue = "") => {
     try {
-      const response = await authAPIWithoutParams(token).get(
-        endpoints.activeTheses
-      );
-
-      let transformData = response.data
-        .filter((thesis) => thesis.council === null)
-        .map((thesis) => ({ label: thesis.title, value: thesis.id }));
-
-      setDropdownTheses(transformData);
-    } catch (ex) {
-      console.error(ex);
-      setAllTheses(null);
-    }
-  };
-
-  const loadCouncils = async () => {
-    try {
-      const response = await authAPIWithoutParams(token).get(
+      let params = {
+        page: currentPage,
+        search: searchValue,
+      };
+      const response = await authAPIWithParams(token, params).get(
         endpoints.councils
       );
-      setCouncils(response.data);
+      setCouncils(response.data.results);
+
+      return Math.ceil(response.data.count / 6);
     } catch (ex) {
       console.error(ex);
-      setCouncils(null);
+      setCouncils([]);
     }
   };
 
-  useEffect(() => {
-    loadCouncils();
-    loadDropdownTheses();
-  }, [updated]);
+  const handleCreate = async (councilName) => {
+    try {
+      await authAPIWithoutParams(token).post(endpoints.councils, {
+        name: councilName,
+      });
+      loadCouncils();
+    } catch (error) {
+      Alert.alert(
+        "Lỗi",
+        `Error during API request:, ${error}`[
+          { text: "OK", onPress: () => {} }
+        ],
+        { cancelable: false }
+      );
+    } finally {
+      setModalVisible(false);
+    }
+  };
 
-  useEffect(() => {
-    loadDropdownTheses();
-  }, []);
-
-  useEffect(() => {
+  const handleToggleLock = async () => {
+    let response = await authAPIWithoutParams(token).patch(
+      endpoints.toggleCouncil(council.id)
+    );
     loadCouncils();
-  }, [searchValue]);
+    setCouncil((prev) => ({ ...prev, is_active: response.data }));
+  };
 
   return (
-    <DefaultLayout>
-      <View style={styles.header}>
-        <ButtonComponent
-          outline
-          style={{ container: { marginBottom: -6 } }}
-          onClick={() =>
-            navigation.navigate("CreateCouncilPage", { token: token })
-          }
-        >
-          Tạo hội đồng
-        </ButtonComponent>
-      </View>
-      <InputBox
-        label="Tìm kiếm"
-        icon={<FontAwesomeIcon icon={faXmarkCircle} />}
-        value={searchValue}
-        onChange={handleSearch}
-        removeIcon={true}
-        style={styles.searchBox}
-      />
-      <View>
-        <View
-          style={{
-            flexDirection: "row",
-            marginTop: 12,
-            paddingHorizontal: 8,
-            paddingVertical: 14,
-            backgroundColor: "#0c56d0",
+    <>
+      <DefaultLayout>
+        <View style={{}}>
+          <ButtonComponent
+            outline
+            style={{ container: { marginBottom: -6 } }}
+            onClick={() => setModalVisible(true)}
+          >
+            Tạo hội đồng
+          </ButtonComponent>
+        </View>
+        <CouncilItems
+          councils={councils}
+          loadCouncils={loadCouncils}
+          onClickItem={(council) => {
+            setCouncil(council);
+            setCouncilModalVisible(true);
           }}
-        >
-          <Text style={{ flex: 1 }}>ID</Text>
-          <Text style={{ flex: 4 }}>Tên hội đồng</Text>
-          <Text style={{ flex: 3 }}>Ngày tạo</Text>
-          <Text style={{ flex: 3 }}>Trạng thái</Text>
-        </View>
-        <View>
-          {councils === null ? (
-            <ActivityIndicator />
-          ) : (
-            <>
-              {councils.map((council) => (
-                <CouncilItem
-                  council={council}
-                  key={council.id}
-                  style={{ container: { borderColor: "#0c56d0" } }}
-                  onPress={() =>
-                    navigation.navigate("CouncilPage", {
-                      councilId: council.id,
-                      token: token,
-                      dropdownTheses: dropdownTheses,
-                      dropdownLecturers: lecturers,
-                    })
-                  }
-                />
-              ))}
-            </>
-          )}
-        </View>
-      </View>
-    </DefaultLayout>
+        />
+      </DefaultLayout>
+      <ModalComponent
+        visible={modalVisible}
+        unVisible={() => setModalVisible(false)}
+        content={
+          <CreateCouncilModal token={token} handleCreate={handleCreate} />
+        }
+        title="Tạo hội đồng"
+      />
+      {Object.keys(council).length !== 0 && (
+        <ModalComponent
+          title="chi tiết"
+          visible={councilModalVisible}
+          unVisible={() => setCouncilModalVisible(false)}
+          content={
+            <CouncilDetail
+              council={council}
+              token={token}
+              handleToggleLock={handleToggleLock}
+            />
+          }
+        />
+      )}
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  header: { flexDirection: "row", justifyContent: "flex-end" },
-  searchBox: {
-    inputBox: {
-      width: "100%",
-      marginBottom: 20,
-    },
-  },
-});
+const CreateCouncilModal = ({ handleCreate }) => {
+  const [councilName, setCouncilName] = useState();
+  const [errorStyle, setErrorStyle] = useState({});
+
+  return (
+    <View
+      style={{
+        width: SCREEN_WIDTH * 0.8,
+        alignItems: "center",
+      }}
+    >
+      <View style={{ width: "100%" }}>
+        <Text style={{ fontSize: 16, marginVertical: 10 }}>Tên hội đồng:</Text>
+        <TextInput
+          style={[
+            {
+              borderWidth: 1,
+              borderColor: "#ccc",
+              paddingHorizontal: 10,
+              paddingVertical: 6,
+              fontSize: 16,
+            },
+            errorStyle,
+          ]}
+          placeholder="Nhập..."
+          value={councilName}
+          onChangeText={(text) => {
+            setCouncilName(text);
+            setErrorStyle({});
+          }}
+        />
+      </View>
+      <ButtonComponent
+        rounded
+        style={{ container: { width: 200, marginTop: 20 } }}
+        onClick={() => {
+          if (councilName) handleCreate(councilName);
+          else setErrorStyle({ borderColor: "red" });
+        }}
+      >
+        Tạo
+      </ButtonComponent>
+    </View>
+  );
+};
 
 export default CouncilsPage;

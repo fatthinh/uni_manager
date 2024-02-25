@@ -1,22 +1,20 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import ButtonComponent from "../../components/ButtonComponent";
 import Styles, { Line } from "./Styles";
 import { login } from "../../redux/actions/userActions";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 
 function LoginPage({ navigation }) {
-  const [password, setPassword] = useState(null);
   const [username, setUsername] = useState(null);
-  const dispatch = useDispatch();
+  const [password, setPassword] = useState(null);
 
+  const dispatch = useDispatch();
   const userLogin = useSelector((state) => state.userLogin);
   const { loading, userInfo, error } = userLogin;
 
@@ -25,7 +23,7 @@ function LoginPage({ navigation }) {
   };
 
   useEffect(() => {
-    if (userInfo && userInfo.username === username) {
+    if (userInfo) {
       navigation.navigate("HomePage");
     }
   }, [loading]);

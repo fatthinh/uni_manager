@@ -1,50 +1,44 @@
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
-import { authAPIWithoutParams, endpoints } from "../../configs/API";
+import { useState } from "react";
+import { authAPIWithParams, endpoints } from "../../configs/API";
 import DefaultLayout from "../../layouts/DefaultLayout";
 import CouncilItems from "../CouncilsPage/CouncilItems";
 
 function LecturerCouncils({ route, navigation }) {
-  const [councils, setCouncils] = useState(null);
-  // const { userInfo } = useSelector((state) => state.userLogin);
+  const [councils, setCouncils] = useState([]);
   const { token } = route.params;
 
-  useEffect(() => {
-    const loadCouncils = async () => {
-      let response = await authAPIWithoutParams(token).get(
+  const loadCouncils = async (currentPage, searchValue = "") => {
+    try {
+      let params = {
+        page: currentPage,
+        search: searchValue,
+      };
+      let response = await authAPIWithParams(token, params).get(
         endpoints.lecturerCouncils
       );
-      setCouncils(response.data);
-    };
+      setCouncils(response.data.results);
 
-    loadCouncils();
-  }, [token]);
+      return Math.ceil(response.data.count / 6);
+    } catch (ex) {
+      console.error(ex);
+      setCouncils([]);
+    }
+  };
 
-  const onClickItem = (councilId) => {
+  const onClickItem = (council) => {
     navigation.navigate("LecturerTheses", {
-      councilId: councilId,
+      councilId: council.id,
       token: token,
     });
   };
 
   return (
     <DefaultLayout>
-      {councils === null ? (
-        <>
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text>Bạn không thuộc hội đồng đánh giá nào!!!</Text>
-          </View>
-        </>
-      ) : (
-        <CouncilItems councils={councils} onClickItem={onClickItem} />
-      )}
+      <CouncilItems
+        councils={councils}
+        loadCouncils={loadCouncils}
+        onClickItem={onClickItem}
+      />
     </DefaultLayout>
   );
 }

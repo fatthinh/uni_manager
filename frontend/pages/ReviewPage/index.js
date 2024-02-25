@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Text } from "react-native";
+import { Alert, Text, View } from "react-native";
 import ButtonComponent from "../../components/ButtonComponent";
 import InputBox from "../../components/InputBox";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
@@ -30,14 +30,13 @@ function ReviewPage({ route, navigation }) {
         });
       }
 
-      Alert.alert("Thông báo", "Đã thêm thành công!", [
+      Alert.alert("Thông báo", "Gửi thành hành công!", [
         {
           text: "Thoát",
           onPress: () =>
             navigation.navigate("ThesisPage", {
-              thesisId: thesis.id,
+              thesis: thesis,
               token: token,
-              updated: Math.random(),
             }),
         },
       ]);
@@ -59,40 +58,41 @@ function ReviewPage({ route, navigation }) {
       title="Đánh giá"
       toParentPage={() =>
         navigation.navigate("ThesisPage", {
-          thesisId: thesis.id,
-          updated: Math.random(),
+          thesis: thesis,
           token: token,
         })
       }
     >
-      <Text style={{ fontSize: 18 }}>{thesis.title}</Text>
-      <InputBox
-        keyboardType="numeric"
-        label="Điểm nội dung"
-        value={contentScore}
-        onChange={(value) => setContentScore(value)}
-      />
-      <InputBox
-        keyboardType="numeric"
-        label="Điểm trình bày"
-        value={presentationScore}
-        onChange={(value) => setPresentationScore(value)}
-      />
-      <InputBox
-        label="Nhận xét"
-        multiline
-        style={{ inputBox: { height: 120 }, input: { paddingVertical: 16 } }}
-        value={comment}
-        onChange={(text) => setComment(text)}
-      />
-      <ButtonComponent
-        rounded
-        primary
-        style={{ container: { width: 260, height: 70, marginTop: 20 } }}
-        onClick={handleSubmit}
-      >
-        Gửi
-      </ButtonComponent>
+      <View style={{ marginTop: 20, alignItems: "center" }}>
+        <Text style={{ fontSize: 18 }}>{thesis.title}</Text>
+        <InputBox
+          keyboardType="numeric"
+          label="Điểm nội dung"
+          value={contentScore}
+          onChange={(value) => setContentScore(value)}
+        />
+        <InputBox
+          keyboardType="numeric"
+          label="Điểm trình bày"
+          value={presentationScore}
+          onChange={(value) => setPresentationScore(value)}
+        />
+        <InputBox
+          label="Nhận xét"
+          multiline
+          style={{ inputBox: { height: 120 }, input: { paddingVertical: 16 } }}
+          value={comment}
+          onChange={(text) => setComment(text)}
+        />
+        <ButtonComponent
+          rounded
+          primary
+          style={{ container: { width: 260, height: 70, marginTop: 20 } }}
+          onClick={handleSubmit}
+        >
+          Gửi
+        </ButtonComponent>
+      </View>
     </DetailLayout>
   );
 }

@@ -1,5 +1,9 @@
 import { faCopyright } from "@fortawesome/free-regular-svg-icons";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleDown,
+  faAngleUp,
+  faChevronLeft,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useEffect, useState } from "react";
 import {
@@ -10,10 +14,15 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Keyboard,
+  Platform,
 } from "react-native";
 import ButtonComponent from "../../components/ButtonComponent";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+const SCREEN_HEIGHT =
+  Platform.OS === "ios"
+    ? Dimensions.get("screen").height
+    : Dimensions.get("window").height;
 
 function DetailLayout({
   children,
@@ -22,28 +31,7 @@ function DetailLayout({
   toParentPage,
   style: customStyles,
 }) {
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      (event) => {
-        setKeyboardHeight(event.endCoordinates.height);
-      }
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setKeyboardHeight(0);
-      }
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
+  const [actionsShow, setActionShow] = useState(false);
 
   return (
     <View style={[styles.container, customStyles && customStyles.container]}>
@@ -54,7 +42,7 @@ function DetailLayout({
             container: {
               position: "absolute",
               left: -18,
-              top: 18,
+              top: 28,
             },
             children: {
               marginHorizontal: 0,
@@ -69,29 +57,36 @@ function DetailLayout({
         </ButtonComponent>
         <Text style={[styles.title, styles.textColor]}>{title}</Text>
       </View>
-      <View style={[styles.children, customStyles && customStyles.children]}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        >
-          <ScrollView>
-            <View style={{ padding: 12, alignItems: "center" }}>
-              {children}
-            </View>
-            <View
-              style={{
-                height: keyboardHeight / 2,
-              }}
-            />
-          </ScrollView>
+      <View
+        style={[
+          customStyles && customStyles.children,
+          actionsShow
+            ? { height: SCREEN_HEIGHT - 180 }
+            : { height: SCREEN_HEIGHT - 120 },
+          !childrenActions && { height: SCREEN_HEIGHT - 114 },
+        ]}
+      >
+        {/* <ScrollView style={{ flex: 1, paddingHorizontal: 12, width: "100%" }}> */}
+        <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={80}>
+          {children}
         </KeyboardAvoidingView>
+        {/* </ScrollView> */}
       </View>
+      {childrenActions && (
+        <ButtonComponent
+          style={{
+            container: {
+              paddingVertical: 0,
+              height: 40,
+            },
+          }}
+          onClick={() => setActionShow((prev) => !prev)}
+        >
+          <FontAwesomeIcon icon={actionsShow ? faAngleDown : faAngleUp} />
+        </ButtonComponent>
+      )}
       <View style={[styles.actions, customStyles && customStyles.actions]}>
         {childrenActions}
-      </View>
-      <View style={styles.footer}>
-        <FontAwesomeIcon icon={faCopyright} style={styles.textColor} />
-        <Text style={[{ marginLeft: 2 }, styles.textColor]}>th</Text>
       </View>
     </View>
   );
@@ -100,36 +95,25 @@ function DetailLayout({
 const styles = StyleSheet.create({
   container: {
     height: SCREEN_HEIGHT,
-    display: "flex",
     backgroundColor: "#fff",
   },
   header: {
-    flex: 2,
+    height: 80,
     backgroundColor: "#0c56d0",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 100000,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
   },
-  children: {
-    flex: 10,
-  },
   actions: {
-    flex: 4,
     flexDirection: "row",
     justifyContent: "flex-end",
   },
   textColor: {
     color: "#fff",
-  },
-  footer: {
-    flex: 1,
-    backgroundColor: "#0c56d0",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
   },
 });
 

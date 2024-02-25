@@ -42,10 +42,14 @@ function MyProfile({ route, navigation }) {
     if (status !== "granted") {
       alert("Không có quyền truy cập!");
     } else {
-      let res = await ImagePicker.launchImageLibraryAsync();
-
-      if (!res.canceled) {
-        changeAvt(res.assets[0]);
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [5, 4],
+        quality: 1,
+      });
+      if (!result.canceled) {
+        changeAvt(result.assets[0]);
       }
     }
   };

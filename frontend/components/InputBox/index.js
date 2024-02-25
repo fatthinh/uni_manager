@@ -1,5 +1,5 @@
 import { text } from "@fortawesome/fontawesome-svg-core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -36,7 +36,7 @@ function InputBox({
   }, [value]);
 
   const handleClearInput = () => {
-    setTempValue(null);
+    setTempValue("");
   };
 
   return (

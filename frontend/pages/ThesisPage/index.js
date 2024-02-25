@@ -1,79 +1,191 @@
-import { Text, View, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Linking,
+  Modal,
+  Button,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+} from "react-native";
 import DetailLayout from "../../layouts/DetailLayout";
 import InputBox from "../../components/InputBox";
 import ButtonComponent from "../../components/ButtonComponent";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import * as Print from "expo-print";
+import { shareAsync } from "expo-sharing";
+import { useFocusEffect } from "@react-navigation/native";
 
 function ThesisPage({ navigation, route }) {
-  const { token, thesisId, updated } = route.params;
+  const { thesis, token } = route.params;
   const { userInfo } = useSelector((state) => state.userLogin);
-  const [thesis, setThesis] = useState(null);
   const [myReview, setMyReview] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
-  const loadThesis = async () => {
+  const loadReviews = async () => {
     let response = await authAPIWithoutParams(token).get(
-      endpoints.thesis(thesisId)
+      endpoints.thesisReivews(thesis.id)
     );
-    setThesis(response.data);
+    setReviews(response.data);
   };
 
   const loadMyReview = async () => {
     try {
       let response = await authAPIWithoutParams(token).get(
-        endpoints.myReview(thesisId)
+        endpoints.myReview(thesis.id)
       );
       setMyReview(response.data);
-    } catch (ex) {
+    } catch (error) {
+      // console.error("Error loading review:", error);
       setMyReview(null);
     }
   };
 
-  useEffect(() => {
-    loadThesis();
-  }, [thesisId]);
+  // useEffect(() => {
+  //   loadReviews();
+  //   loadMyReview();
+  // }, [thesis.id, updated]);
 
-  useEffect(() => {
-    loadMyReview();
-  }, [token, updated]);
+  useFocusEffect(
+    useCallback(() => {
+      loadReviews();
+      loadMyReview();
+    }, [thesis.id])
+  );
 
   const handleActive = async () => {
     let response = await authAPIWithoutParams(token).patch(
-      endpoints.toggleThesis(thesisId)
+      endpoints.toggleThesis(thesis.id)
     );
-    setThesis(response.data);
+    navigation.navigate("ThesesPage", { token: token });
   };
 
   const toParentPage = () => {
     if (userInfo) {
-      if (userInfo.role === "PROVOST")
-        navigation.navigate("ThesesPage", { token: token });
-      else if (userInfo.role === "LECTURER")
+      if (userInfo.role === "LECTURER")
         navigation.navigate("LecturerTheses", {
-          councilId: thesis.council.id,
           token: token,
+          councilId: thesis.council.id,
         });
-    } else navigation.navigate("HomePage");
+      else navigation.navigate("ThesesPage", { token: token });
+    }
   };
 
-  const actions = () => {
+  const openFile = (fileUrl) => {
+    let url = `http://192.168.1.42:8000${fileUrl}`;
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        console.error("Don't know how to open URI: ", url);
+      }
+    });
+  };
+
+  const print = async () => {
+    await Print.printAsync({
+      html: createDynamicTable(),
+    });
+  };
+
+  const createDynamicTable = () => {
+    var table = "";
+    if (reviews.length)
+      reviews.map((review) => {
+        table =
+          table +
+          `
+        <tr>
+          <td>${`${review.author_firstname} ${review.author_lastname}`}</td>
+          <td>${review.author_email}</td>
+          <td>${parseFloat(review.final_score.toFixed(2))}</td>
+        </tr>
+        `;
+      });
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+        <style>
+          table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+          }
+          
+          td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 12px;
+            font-size: 1.5em;
+          }
+          
+          tr:nth-child(even) {
+            background-color: #dddddd;
+          }
+
+          div span {
+            font-size: 1.6em;
+          }
+
+          li {
+            font-size: 1.5em;
+            font-style: italic;
+          }
+
+        </style>
+        </head>
+        <body>
+        
+        <h1 style="color:blue; font-size: 2em">Phiếu đánh giá: <span>${
+          thesis.title
+        }</span></h1>
+        
+        <div style="display: flex; flex-direction: row; gap: 80px;">
+          <div>
+            <h2>Sinh viên thực hiện:</h2>
+            <ul>
+              ${thesis.students.map(
+                (student) => `<li>${student.get_full_name}</li>`
+              )}
+            </ul>
+          </div>
+          <div>
+            <h2>Giảng viên hướng dẫn:</h2>
+            <ul>
+              ${thesis.supervisors.map(
+                (supervisor) => `<li>${supervisor.get_full_name}</li>`
+              )}
+            </ul>
+          </div>
+        </div>
+        
+        <table>
+          <tr>
+            <th>Người đánh giá</th>
+            <th>Liên hệ</th>
+            <th>Điểm</th>
+          </tr>
+          ${table}
+        </table>
+        </body>
+      </html>
+        `;
+    return html;
+  };
+
+  const activedActions = () => {
     return (
       <>
-        {thesis && !thesis.is_active && (
-          <ButtonComponent
-            rounded
-            primary
-            style={{ container: { width: 200 } }}
-            onClick={handleActive}
-          >
-            Duyệt
-          </ButtonComponent>
-        )}
-        {userInfo && userInfo.role === "LECTURER" && (
+        {userInfo?.role === "LECTURER" ? (
           <ButtonComponent
             primary
             rounded
@@ -85,40 +197,67 @@ function ThesisPage({ navigation, route }) {
               })
             }
             style={{ container: { width: 260 } }}
+            disabled={!thesis.council?.is_active}
           >
             {myReview ? "Sửa đánh giá" : "Thêm đánh giá"}
+          </ButtonComponent>
+        ) : (
+          <ButtonComponent
+            rounded
+            primary
+            style={{ container: { width: 200 } }}
+            disabled={thesis.council?.is_active || !thesis.council}
+            onClick={print}
+          >
+            Xuất bảng đánh giá
           </ButtonComponent>
         )}
       </>
     );
   };
 
+  const notActivedActions = () => {
+    return (
+      <ButtonComponent
+        rounded
+        primary
+        style={{ container: { width: 200 } }}
+        onClick={handleActive}
+      >
+        Duyệt
+      </ButtonComponent>
+    );
+  };
+
   return (
-    <DetailLayout
-      title="Chi tiết khóa luận"
-      toParentPage={toParentPage}
-      style={{
-        actions: {
-          flex: 1.2,
-          justifyContent: "center",
-        },
-        children: {},
-      }}
-      childrenActions={actions()}
-    >
-      {thesis === null ? (
-        <ActivityIndicator />
-      ) : (
-        <>
-          <ThesisView thesis={thesis} />
-          <ThesisReviews thesis={thesis} token={token} />
-        </>
-      )}
-    </DetailLayout>
+    <>
+      <DetailLayout
+        title="Chi tiết khóa luận"
+        toParentPage={toParentPage}
+        style={{
+          actions: {
+            flex: 1.2,
+            justifyContent: "center",
+          },
+        }}
+        childrenActions={
+          thesis?.is_active ? activedActions() : notActivedActions()
+        }
+      >
+        {thesis === null ? (
+          <ActivityIndicator />
+        ) : (
+          <>
+            <ThesisView thesis={thesis} onClickFile={openFile} />
+            <ThesisReviews reviews={reviews} />
+          </>
+        )}
+      </DetailLayout>
+    </>
   );
 }
 
-const ThesisView = ({ thesis }) => {
+const ThesisView = ({ thesis, onClickFile }) => {
   return (
     <>
       <Text style={styles.title}>{thesis.title}</Text>
@@ -139,15 +278,23 @@ const ThesisView = ({ thesis }) => {
       </View>
       <View style={styles.filesField}>
         <Text style={{ fontSize: 18 }}>Files: </Text>
-        <Text style={styles.fileName}>{thesis.files}</Text>
+        <ButtonComponent
+          rounded
+          style={{ container: { width: 280 } }}
+          onClick={() => onClickFile(thesis.files)}
+        >
+          {thesis.files.substring(thesis.files.lastIndexOf("/") + 1)}
+        </ButtonComponent>
       </View>
       <View style={styles.row}>
         <Text style={{ fontSize: 18, marginRight: 20 }}>
           Hội đồng đánh giá:
         </Text>
-        <Text style={{ fontSize: 20, fontStyle: "italic", fontWeight: 500 }}>
-          {thesis.council ? thesis.council.name : "Chưa có"}
-        </Text>
+        <SafeAreaView style={{ flex: 2 }}>
+          <Text style={{ fontSize: 20, fontStyle: "italic", fontWeight: 500 }}>
+            {thesis.council ? thesis.council.name.split("(").pop() : "Chưa có"}
+          </Text>
+        </SafeAreaView>
       </View>
       <View style={styles.row}>
         <Text style={{ fontSize: 18, marginRight: 20 }}>
@@ -177,25 +324,7 @@ const ThesisView = ({ thesis }) => {
   );
 };
 
-const ThesisReviews = ({ thesis, token }) => {
-  const [reviews, setReviews] = useState([]);
-
-  const loadReviews = async () => {
-    let response = await authAPIWithoutParams(token).get(
-      endpoints.thesisReivews(thesis.id)
-    );
-    setReviews(response.data);
-  };
-
-  const handleRefresh = () => {
-    setReviews([]);
-    setTimeout(() => loadReviews(), 1000);
-  };
-
-  useEffect(() => {
-    loadReviews();
-  }, [thesis]);
-
+const ThesisReviews = ({ reviews }) => {
   return (
     <View
       style={{
@@ -206,10 +335,8 @@ const ThesisReviews = ({ thesis, token }) => {
         borderRadius: 20,
       }}
     >
-      <View style={{}}>
-        {reviews.length === 0 ? (
-          <Text style={{ color: "blue", fontSize: 16 }}>Không có đánh giá</Text>
-        ) : (
+      <View>
+        {reviews.length ? (
           <>
             <View
               style={{
@@ -218,15 +345,16 @@ const ThesisReviews = ({ thesis, token }) => {
                 justifyContent: "space-between",
               }}
             >
-              <Text style={{ color: "blue", fontSize: 16 }}>Các đánh giá</Text>
-              <ButtonComponent style={{}} onClick={handleRefresh}>
-                <FontAwesomeIcon icon={faArrowsRotate} />
-              </ButtonComponent>
+              <Text style={{ color: "blue", fontSize: 16, marginVertical: 10 }}>
+                Các đánh giá
+              </Text>
             </View>
             {reviews.map((review, index) => (
               <Review review={review} key={index} />
             ))}
           </>
+        ) : (
+          <Text style={{ color: "blue", fontSize: 16 }}>Không có đánh giá</Text>
         )}
       </View>
     </View>
@@ -241,7 +369,9 @@ const Review = ({ review }) => {
       }}
     >
       <Text>{`${review.author_firstname} ${review.author_lastname}`}</Text>
-      <Text>{`${review.comment} | Điểm đánh giá: ${review.final_score}`}</Text>
+      <Text>{`${review.comment} | Điểm đánh giá: ${parseFloat(
+        review.final_score.toFixed(2)
+      )}`}</Text>
       <Text></Text>
       <Text style={{ position: "absolute", right: 0, bottom: 0 }}>
         {`Đã đánh giá ${moment(review.updated_at).fromNow()}`}
