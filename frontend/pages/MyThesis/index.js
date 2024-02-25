@@ -16,7 +16,7 @@ import {
   faPen,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
-import { openSearchModal } from "../../redux/actions/openSearchModal";
+import { openSearchModal } from "../../redux/actions/searchModal";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const MAJORS = [

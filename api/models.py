@@ -28,6 +28,8 @@ class BaseModel(models.Model):
         abstract = True
 
 # Thành viên hội đồng
+
+
 class CouncilMembership(models.Model):
     ROLES = (
         ('CHAIRMAN', 'chairman'),
@@ -49,6 +51,8 @@ class CouncilMembership(models.Model):
         unique_together = ['user', 'council']
 
 # Hội đồng
+
+
 class Council(BaseModel):
     name = models.CharField(max_length=100, null=True)
     members = models.ManyToManyField(

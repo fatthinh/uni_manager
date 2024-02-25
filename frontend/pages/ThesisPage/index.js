@@ -4,30 +4,27 @@ import {
   StyleSheet,
   ActivityIndicator,
   Linking,
-  Modal,
-  Button,
-  Platform,
   SafeAreaView,
   ScrollView,
+  Alert,
 } from "react-native";
 import DetailLayout from "../../layouts/DetailLayout";
 import InputBox from "../../components/InputBox";
 import ButtonComponent from "../../components/ButtonComponent";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
 import moment from "moment";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import * as Print from "expo-print";
-import { shareAsync } from "expo-sharing";
 import { useFocusEffect } from "@react-navigation/native";
+import ModalComponent from "../../components/ModalComponent";
 
 function ThesisPage({ navigation, route }) {
   const { thesis, token } = route.params;
   const { userInfo } = useSelector((state) => state.userLogin);
   const [myReview, setMyReview] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [reviewVisible, setReviewVisible] = useState(false);
 
   const loadReviews = async () => {
     let response = await authAPIWithoutParams(token).get(
@@ -43,22 +40,14 @@ function ThesisPage({ navigation, route }) {
       );
       setMyReview(response.data);
     } catch (error) {
-      // console.error("Error loading review:", error);
       setMyReview(null);
     }
   };
 
-  // useEffect(() => {
-  //   loadReviews();
-  //   loadMyReview();
-  // }, [thesis.id, updated]);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadReviews();
-      loadMyReview();
-    }, [thesis.id])
-  );
+  useEffect(() => {
+    loadReviews();
+    loadMyReview();
+  }, [thesis, token]);
 
   const handleActive = async () => {
     let response = await authAPIWithoutParams(token).patch(
@@ -189,13 +178,7 @@ function ThesisPage({ navigation, route }) {
           <ButtonComponent
             primary
             rounded
-            onClick={() =>
-              navigation.navigate("ReviewPage", {
-                thesis: thesis,
-                token: token,
-                review: myReview,
-              })
-            }
+            onClick={() => setReviewVisible(true)}
             style={{ container: { width: 260 } }}
             disabled={!thesis.council?.is_active}
           >
@@ -253,13 +236,109 @@ function ThesisPage({ navigation, route }) {
           </>
         )}
       </DetailLayout>
+      <ReviewModal
+        myReview={myReview}
+        token={token}
+        thesis={thesis}
+        visible={reviewVisible}
+        unVisible={() => {
+          setReviewVisible(false);
+          loadReviews();
+          loadMyReview();
+        }}
+      />
     </>
   );
 }
 
+const ReviewModal = ({ myReview, token, thesis, visible, unVisible }) => {
+  const [contentScore, setContentScore] = useState(null);
+  const [presentationScore, setPresentationScore] = useState(null);
+  const [comment, setComment] = useState(null);
+
+  const handleSubmit = async () => {
+    try {
+      if (myReview)
+        await authAPIWithoutParams(token).patch(
+          endpoints.updateReview(thesis.id),
+          {
+            presentation_score: presentationScore,
+            content_score: contentScore,
+            comment: comment,
+          }
+        );
+      else {
+        await authAPIWithoutParams(token).post(endpoints.addReview(thesis.id), {
+          presentation_score: presentationScore,
+          content_score: contentScore,
+          comment: comment,
+        });
+      }
+
+      Alert.alert("Thông báo", "Gửi thành hành công!", [
+        {
+          text: "Thoát",
+          onPress: unVisible,
+        },
+      ]);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    }
+  };
+
+  useEffect(() => {
+    setContentScore(myReview?.content_score.toString());
+    setPresentationScore(myReview?.presentation_score.toString());
+    setComment(myReview?.comment);
+  }, [myReview]);
+
+  return (
+    <ModalComponent
+      content={
+        <View style={{ marginTop: 20, alignItems: "center" }}>
+          <Text style={{ fontSize: 18 }}>{thesis.title}</Text>
+          <InputBox
+            keyboardType="numeric"
+            label="Điểm nội dung"
+            value={contentScore}
+            onChange={(value) => setContentScore(value)}
+          />
+          <InputBox
+            keyboardType="numeric"
+            label="Điểm trình bày"
+            value={presentationScore}
+            onChange={(value) => setPresentationScore(value)}
+          />
+          <InputBox
+            label="Nhận xét"
+            multiline
+            style={{
+              inputBox: { height: 120 },
+              input: { paddingVertical: 16 },
+            }}
+            value={comment}
+            onChange={(text) => setComment(text)}
+          />
+          <ButtonComponent
+            rounded
+            primary
+            style={{ container: { width: 260, height: 50, marginTop: 20 } }}
+            onClick={handleSubmit}
+          >
+            Gửi
+          </ButtonComponent>
+        </View>
+      }
+      title="Đánh giá"
+      unVisible={unVisible}
+      visible={visible}
+    />
+  );
+};
+
 const ThesisView = ({ thesis, onClickFile }) => {
   return (
-    <>
+    <View style={{ padding: 10 }}>
       <Text style={styles.title}>{thesis.title}</Text>
       <View style={styles.status}>
         <Text>Trạng thái: </Text>
@@ -320,7 +399,7 @@ const ThesisView = ({ thesis, onClickFile }) => {
           ))}
         </View>
       </View>
-    </>
+    </View>
   );
 };
 
@@ -332,10 +411,11 @@ const ThesisReviews = ({ reviews }) => {
         padding: 8,
         backgroundColor: "#ccc",
         opacity: 0.6,
-        borderRadius: 20,
+        borderRadius: 8,
+        height: reviews.length ? 114 : 40,
       }}
     >
-      <View>
+      <View style={{}}>
         {reviews.length ? (
           <>
             <View
@@ -349,9 +429,13 @@ const ThesisReviews = ({ reviews }) => {
                 Các đánh giá
               </Text>
             </View>
-            {reviews.map((review, index) => (
-              <Review review={review} key={index} />
-            ))}
+            <View style={{ height: 62 }}>
+              <ScrollView>
+                {reviews.map((review, index) => (
+                  <Review review={review} key={index} />
+                ))}
+              </ScrollView>
+            </View>
           </>
         ) : (
           <Text style={{ color: "blue", fontSize: 16 }}>Không có đánh giá</Text>
@@ -381,7 +465,7 @@ const Review = ({ review }) => {
 };
 
 const styles = StyleSheet.create({
-  title: { fontSize: 26, fontWeight: "600" },
+  title: { fontSize: 24, fontWeight: "600" },
   status: { flexDirection: "row", alignItems: "center" },
   filesField: {
     flexDirection: "row",
@@ -405,7 +489,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderColor: "#ccc",
-    marginVertical: 28,
+    marginVertical: 22,
   },
   info: {
     padding: 8,

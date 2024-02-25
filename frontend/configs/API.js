@@ -11,6 +11,7 @@ export const endpoints = {
   theses: "theses/",
   notActiveTheses: "theses/not-active/",
   activeTheses: "theses/active/",
+  notCouncilTheses: "theses/not-council/",
   thesis: (thesisId) => `theses/${thesisId}/`,
   createThesis: `theses/create-thesis/`,
   updateThesis: (thesisId) => `theses/${thesisId}/update-thesis/`,

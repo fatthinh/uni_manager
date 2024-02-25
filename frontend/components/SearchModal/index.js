@@ -13,11 +13,10 @@ import {
 import ButtonComponent from "../ButtonComponent";
 import { useEffect, useRef, useState } from "react";
 import images from "../../assets/images";
-import { useNavigation } from "@react-navigation/native";
 import useDebounce from "../../hooks/useDebounce";
 import API, { endpoints } from "../../configs/API";
 import { useDispatch } from "react-redux";
-import { closeSearchModal } from "../../redux/actions/openSearchModal";
+import { closeSearchModal } from "../../redux/actions/searchModal";
 
 function SearchModal({ visible, onClickModalItem, filter }) {
   const [searchValue, setSearchValue] = useState(null);

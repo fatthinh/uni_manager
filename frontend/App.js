@@ -13,7 +13,6 @@ import CouncilsPage from "./pages/CouncilsPage";
 import store from "./redux/store";
 import { Provider, useSelector } from "react-redux";
 import MyThesis from "./pages/MyThesis";
-import ReviewPage from "./pages/ReviewPage";
 import MyProfile from "./pages/AccountPage/MyProfile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LecturerCouncils from "./pages/Lecturer/LecturerCouncils";
@@ -79,11 +78,6 @@ export default function App() {
     {
       name: "LecturerTheses",
       component: LecturerTheses,
-      options: { headerShown: false },
-    },
-    {
-      name: "ReviewPage",
-      component: ReviewPage,
       options: { headerShown: false },
     },
     {

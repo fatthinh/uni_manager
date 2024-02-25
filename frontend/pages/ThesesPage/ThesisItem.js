@@ -1,9 +1,9 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import moment from "moment";
 
-function ThesisItem({ thesis, onPress, style: customStyles }) {
+function ThesisItem({ thesis, onPress, onLongPress, style: customStyles }) {
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onLongPress={onLongPress} onPress={onPress}>
       <View
         style={[
           {
@@ -18,9 +18,7 @@ function ThesisItem({ thesis, onPress, style: customStyles }) {
         <Text style={{ flex: 1 }}>{thesis.id}</Text>
         <Text style={{ flex: 4 }}>{thesis.title}</Text>
         <Text style={{ flex: 3 }}>{moment(thesis.created_at).fromNow()}</Text>
-        <Text style={{ flex: 3 }}>
-          {thesis.is_active ? "Đã duyệt" : "Chờ"}
-        </Text>
+        <Text style={{ flex: 3 }}>{thesis.is_active ? "Đã duyệt" : "Chờ"}</Text>
       </View>
     </TouchableOpacity>
   );

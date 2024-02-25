@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 import matplotlib.pyplot as plt
 import matplotlib
+import numpy as np
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, generics, status, permissions, parsers
 from rest_framework.views import APIView
@@ -293,6 +294,14 @@ class ThesisViewset(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveUpd
         data = ThesisSerializer(paginated_theses, many=True).data
         return paginator.get_paginated_response(data)
 
+    @action(methods=['get'], detail=False, url_path="not-council")
+    def not_council(self, request):
+        filtered_theses = Thesis.objects.filter(
+            is_active=True, council__isnull=True)
+        serialized_theses = ThesisSerializer(filtered_theses, many=True).data
+
+        return Response(serialized_theses, status=status.HTTP_200_OK)
+
     @action(methods=['patch'], detail=True, url_path="toggle-active")
     def toggle_active(self, request, pk):
         thesis = self.get_object()
@@ -358,7 +367,7 @@ class ThesisViewset(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveUpd
         myReview = request.user.reviews.filter(thesis=thesis)
         if myReview:
             data = ReviewSerializer(myReview[0]).data
-            return Response(data, status=status.HTTP_302_FOUND)
+            return Response(data, status=status.HTTP_200_OK)
         return Response({'message': 'you dont have review'}, status=status.HTTP_404_NOT_FOUND)
 
     @action(methods=['patch'], detail=True, url_path='upload-files')
@@ -404,18 +413,30 @@ matplotlib.use('Agg')
 
 class PlotAPIView(APIView):
     def get(self, request, format=None):
-      # Chuẩn bị dữ liệu
-        diem_range = ["0.0 - 1.9", "2.0 - 3.9",
-                      "4.0 - 5.9", "6.0 - 7.9", "8.0 - 9.9", "10"]
-        so_luong = [236, 420, 600, 50, 29, 1]
+        year = self.request.query_params.get('year', 2024)
+        score_labels = ["0.0 - 1.9", "2.0 - 3.9",
+                        "4.0 - 5.9", "6.0 - 7.9", "8.0 - 9.9", "10"]
+        major_labels = ['IT', 'CS', 'ENG', 'MKT']
 
-        # Vẽ biểu đồ
-        plt.bar(diem_range, so_luong)
+        score_values = [0] * 6
+        major_values = [0] * 4
 
-        # Định dạng biểu đồ
-        plt.xlabel("Range điểm")
-        plt.ylabel("Số lượng thí sinh")
-        plt.title("Phổ điểm thi tốt nghiệp THPT theo range điểm")
+        theses = Thesis.objects.filter(
+            reviews__isnull=False, created_at__year=year)
+        for thesis in theses:
+            reviews = thesis.reviews.all()
+            average_score = reviews.aggregate(
+                avg_score=Avg('final_score'))['avg_score']
+            score_values[int(round(average_score, 1)//2)] += 1
+            major_values[major_labels.index(thesis.major)] += 1
+
+        # SCORE
+        plt.bar(score_labels, score_values)
+
+        plt.xlabel("Khoảng điểm")
+        plt.ylabel("Số lượng bài khóa luận")
+        y_ticks = np.arange(0, max(score_values) + 1, 1)
+        plt.yticks(y_ticks)
 
         # Save the plot to a BytesIO object
         image_stream = BytesIO()
@@ -423,8 +444,26 @@ class PlotAPIView(APIView):
         plt.close()
 
         # Encode the image as base64
-        image_base64 = base64.b64encode(
+        score_image = base64.b64encode(
+            image_stream.getvalue()).decode('utf-8')
+
+        # MAJOR
+        plt.bar(major_labels, major_values)
+
+        plt.xlabel("Ngành")
+        plt.ylabel("Số lượng bài khóa luận")
+        y_ticks = np.arange(0, max(major_values) + 1, 1)
+        plt.yticks(y_ticks)
+
+        # Save the plot to a BytesIO object
+        image_stream = BytesIO()
+        plt.savefig(image_stream, format='png')
+        plt.close()
+
+        # Encode the image as base64
+        major_image = base64.b64encode(
             image_stream.getvalue()).decode('utf-8')
 
         # Return the base64-encoded image as JSON
-        return Response({'image': f'data:image/png;base64,{image_base64}'})
+        return Response({'score_image': f'data:image/png;base64,{score_image}',
+                         'major_image': f'data:image/png;base64,{major_image}'})

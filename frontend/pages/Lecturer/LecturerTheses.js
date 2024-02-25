@@ -44,11 +44,13 @@ function LecturerTheses({ route, navigation }) {
         navigation.navigate("LecturerCouncils", { token: token })
       }
     >
-      <Theses
-        theses={theses}
-        loadTheses={loadTheses}
-        onClickItem={onClickItem}
-      />
+      <View style={{ paddingHorizontal: 10 }}>
+        <Theses
+          theses={theses}
+          loadTheses={loadTheses}
+          onClickItem={onClickItem}
+        />
+      </View>
     </DetailLayout>
   );
 }

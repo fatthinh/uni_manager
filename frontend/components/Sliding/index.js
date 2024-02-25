@@ -2,7 +2,6 @@ import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Dimensions,
   Image,
   StyleSheet,
@@ -24,7 +23,7 @@ function Sliding({ images, title }) {
   };
 
   return (
-    <>
+    <View style={{ height: 520 }}>
       <View style={styles.title}>
         <Text style={styles.titleText}>{title}</Text>
       </View>
@@ -48,7 +47,7 @@ function Sliding({ images, title }) {
           <Text style={styles.contentText}>{images[currentIndex].content}</Text>
         </View>
       </View>
-    </>
+    </View>
   );
 }
 
@@ -79,7 +78,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: "absolute",
-    top: (SCREEN_WIDTH) / 2 - 42,
+    top: SCREEN_WIDTH / 2 - 42,
     zIndex: 1000,
     width: 42,
     height: 42,
@@ -97,6 +96,7 @@ const styles = StyleSheet.create({
   },
   contentText: {
     fontSize: 20,
+    textAlign: "center",
   },
 });
 

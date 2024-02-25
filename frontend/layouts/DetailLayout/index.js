@@ -72,19 +72,22 @@ function DetailLayout({
         </KeyboardAvoidingView>
         {/* </ScrollView> */}
       </View>
-      {childrenActions && (
-        <ButtonComponent
-          style={{
-            container: {
-              paddingVertical: 0,
-              height: 40,
-            },
-          }}
-          onClick={() => setActionShow((prev) => !prev)}
-        >
-          <FontAwesomeIcon icon={actionsShow ? faAngleDown : faAngleUp} />
-        </ButtonComponent>
-      )}
+      <View style={{alignItems:"center"}}>
+        {childrenActions && (
+          <ButtonComponent
+            style={{
+              container: {
+                paddingVertical: 0,
+                height: 40,
+                width: 80,
+              },
+            }}
+            onClick={() => setActionShow((prev) => !prev)}
+          >
+            <FontAwesomeIcon icon={actionsShow ? faAngleDown : faAngleUp} />
+          </ButtonComponent>
+        )}
+      </View>
       <View style={[styles.actions, customStyles && customStyles.actions]}>
         {childrenActions}
       </View>

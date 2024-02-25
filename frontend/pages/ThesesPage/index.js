@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 import { useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent";
@@ -30,12 +30,6 @@ function ThesesPage({ route, navigation }) {
       setTheses([]);
     }
   };
-
-  // useEffect(() => {
-  //   loadTheses(1);
-  // }, [isActive]);
-
-  console.log(isActive);
 
   const onClickItem = (thesis) => {
     navigation.navigate("ThesisPage", {

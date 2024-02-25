@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { loadLecturersName } from "../../redux/actions/loadPublicActions";
 import Sliding from "../../components/Sliding";
 import SearchModal from "../../components/SearchModal";
+import { Button } from "react-native";
+import RemoveModal from "../../components/RemoveModal";
+import { openRemoveModal } from "../../redux/actions/removeModal";
 
 const items = [
   { title: "slide1", src: images.home_slide1, content: "content 1" },
@@ -14,7 +17,8 @@ const items = [
 ];
 
 function HomePage() {
-  const searchModalVisible = useSelector((state) => state.searchModalVisible);
+  const searchModal = useSelector((state) => state.searchModal);
+  const removeModal = useSelector((state) => state.removeModal);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -25,9 +29,13 @@ function HomePage() {
     <DefaultLayout>
       <Sliding images={items} title="Thông báo/Tin tức" />
       <SearchModal
-        visible={searchModalVisible.visible}
-        filter={searchModalVisible.filter}
-        onClickModalItem={searchModalVisible.onClickItem}
+        visible={searchModal.visible}
+        filter={searchModal.filter}
+        onClickModalItem={searchModal.onClickItem}
+      />
+      <RemoveModal
+        onRemove={removeModal.onRemove}
+        visible={removeModal.visible}
       />
     </DefaultLayout>
   );

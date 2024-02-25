@@ -4,21 +4,19 @@ import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import images from "../../assets/images";
 import ButtonComponent from "../../components/ButtonComponent";
-import SearchModal from "../../components/SearchModal";
 import DetailLayout from "../../layouts/DetailLayout";
 import { useFirestore } from "../../hooks/useFirestore";
 import { onSnapshot } from "firebase/firestore";
 import { normalizeTime } from "../../utils/normalizeTime";
-import { addDocument, removeDoc } from "../../firebase/services";
+import { addDocument } from "../../firebase/services";
 import {
   closeSearchModal,
   openSearchModal,
-} from "../../redux/actions/openSearchModal";
+} from "../../redux/actions/searchModal";
 
 function MessagesPage({ navigation, route }) {
   const dispatch = useDispatch();
   const token = useMemo(() => route.params?.token, [token]);
-  const [searchModalVisible, setSearchModalVisible] = useState(false);
   const { userInfo } = useSelector((state) => state.userLogin);
 
   const condition = useMemo(

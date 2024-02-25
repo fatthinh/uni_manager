@@ -1,5 +1,3 @@
-import { faUser } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text, TouchableOpacity, View } from "react-native";
 
 function UserItem({ user, onPress, style: customStyles }) {

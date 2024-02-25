@@ -8,12 +8,13 @@ import {
   View,
   Dimensions,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
 import ThesisItem from "../ThesesPage/ThesisItem";
 import MultiSelectComponent from "../../components/MultiSelectComponent";
 import DropdownComponent from "../../components/Dropdown";
+import { openRemoveModal } from "../../redux/actions/removeModal";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -25,6 +26,7 @@ const COUNCIL_ROLES = [
 ];
 
 function CouncilDetail({ council, handleToggleLock, token }) {
+  const dispatch = useDispatch();
   const [current, setCurrent] = useState(0);
 
   // use for council detail
@@ -37,15 +39,13 @@ function CouncilDetail({ council, handleToggleLock, token }) {
   const loadDropdownTheses = async () => {
     try {
       const response = await authAPIWithoutParams(token).get(
-        endpoints.activeTheses
+        endpoints.notCouncilTheses
       );
 
-      let transformData = response.data.results
-        .filter(
-          (thesis) =>
-            thesis.council === null || thesis.council.id === council.id
-        )
-        .map((thesis) => ({ label: thesis.title, value: thesis.id }));
+      let transformData = response.data.map((thesis) => ({
+        label: thesis.title,
+        value: thesis.id,
+      }));
 
       setDropdownTheses(transformData);
     } catch (ex) {
@@ -95,7 +95,6 @@ function CouncilDetail({ council, handleToggleLock, token }) {
   };
 
   const updateTheses = async (selected) => {
-    console.log(selected);
     try {
       await authAPIWithoutParams(token).patch(
         endpoints.updateCouncilTheses(council.id),
@@ -107,6 +106,14 @@ function CouncilDetail({ council, handleToggleLock, token }) {
     } catch (ex) {
       console.error(ex);
     }
+  };
+
+  const handleRemoveThesis = (thesisToRemove) => {
+    let selected = theses
+      .filter((thesis) => thesis.id !== thesisToRemove)
+      .map((thesis) => thesis.id);
+    console.log(selected);
+    updateTheses(selected);
   };
 
   const onChangeRole = (id, role) => {
@@ -224,6 +231,11 @@ function CouncilDetail({ council, handleToggleLock, token }) {
                     style={{
                       container: { width: "100%", borderColor: "#0c56d0" },
                     }}
+                    onLongPress={() =>
+                      dispatch(
+                        openRemoveModal(() => handleRemoveThesis(thesis.id))
+                      )
+                    }
                   />
                 ))}
               </>
