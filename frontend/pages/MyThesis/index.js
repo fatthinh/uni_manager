@@ -1,33 +1,16 @@
-import { Dimensions, Linking, StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import DefaultLayout from "../../layouts/DefaultLayout";
 import ButtonComponent from "../../components/ButtonComponent";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
 import { createContext, useContext, useEffect, useState } from "react";
 import ModalComponent from "../../components/ModalComponent";
-import InputBox from "../../components/InputBox";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import DropdownComponent from "../../components/Dropdown";
-import { useDispatch, useSelector } from "react-redux";
-import MultiSelectComponent from "../../components/MultiSelectComponent";
+import { useSelector } from "react-redux";
 import * as DocumentPicker from "expo-document-picker";
-import {
-  faArrowLeft,
-  faArrowRight,
-  faPen,
-  faPlus,
-} from "@fortawesome/free-solid-svg-icons";
-import { openSearchModal } from "../../redux/actions/searchModal";
+import ThesisModal from "./ThesisModal";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const MAJORS = [
-  { value: "IT", label: "Infomation Technology" },
-  { value: "CS", label: "Computer Science" },
-  { value: "ENG", label: "English Language" },
-  { value: "MKT", label: "Marketing" },
-];
 const ThesisContext = createContext();
 
-function MyThesis({ navigation, route }) {
+function MyThesis({ route }) {
   const { token } = route.params;
   const updated = route.params?.updated;
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -183,9 +166,9 @@ function MyThesis({ navigation, route }) {
       <ThesisContext.Provider
         value={{
           thesis,
+          file,
           loadThesis,
           onChangeDetail,
-          file,
           pickDocument,
           createThesis,
           setThesis,
@@ -197,7 +180,7 @@ function MyThesis({ navigation, route }) {
           visible={createModalVisible}
           unVisible={() => setCreateModalVisible(false)}
         />
-        <ThesisModal
+        <ViewModal
           visible={thesisModalVisible}
           unVisible={() => setThesisModalVisible(false)}
         />
@@ -220,7 +203,7 @@ const CreateModal = ({ visible, unVisible }) => {
   return (
     <ModalComponent
       content={
-        <Content
+        <ThesisModal
           thesis={thesis}
           onChangeDetail={onChangeDetail}
           file={file}
@@ -245,216 +228,14 @@ const CreateModal = ({ visible, unVisible }) => {
   );
 };
 
-const Content = ({
-  thesis,
-  onChangeDetail,
-  pickDocument,
-  file,
-  createThesis,
-  updateThesis,
-}) => {
-  const dispatch = useDispatch();
-
-  const openFile = (fileUrl) => {
-    console.log(fileUrl);
-    Linking.canOpenURL(fileUrl).then((supported) => {
-      if (supported) {
-        Linking.openURL(fileUrl);
-      } else {
-        console.error("Don't know how to open URI: ", fileUrl);
-      }
-    });
-  };
-
-  const [current, setCurrent] = useState(0);
-  const { lecturers } = useSelector((state) => state.lecturersInfo);
-  const fields = [
-    { field: "title", fieldName: "" },
-    { field: "major", fieldName: "Ngành" },
-    { field: "description", fieldName: "Mô tả" },
-    { field: "files", fieldName: "Files" },
-    { field: "partner", fieldName: "Sinh viên khác" },
-    { field: "supervisors", fieldName: "Giảng viên hướng dẫn" },
-  ];
-
-  const [error, setError] = useState(false);
-
-  return (
-    <View
-      style={{
-        width: SCREEN_WIDTH * 0.8,
-        marginTop: 20,
-      }}
-    >
-      <View style={{}}>
-        {current === 0 && (
-          <InputBox
-            value={thesis?.title}
-            onChange={(value) => onChangeDetail("title", value)}
-            style={{ inputBox: { width: "100%" } }}
-            label="Tên"
-          />
-        )}
-        {current === 1 && (
-          <DropdownComponent
-            data={MAJORS}
-            onChange={(value) => onChangeDetail("major", value)}
-            style={{ dropdownContainer: { width: "100%" } }}
-            value={thesis?.major}
-          />
-        )}
-        {current === 2 && (
-          <InputBox
-            multiline
-            value={thesis?.description}
-            label="Description"
-            onChange={(value) => onChangeDetail("description", value)}
-            style={{
-              inputBox: {
-                width: "100%",
-                height: 100,
-              },
-              input: {
-                width: "100%",
-                marginVertical: 10,
-              },
-              label: {
-                fontWeight: "500",
-              },
-            }}
-          />
-        )}
-        {current === 3 && (
-          <ButtonComponent
-            style={{
-              container: {
-                width: "100%",
-                height: 60,
-              },
-            }}
-            primary
-            onClick={pickDocument}
-          >
-            Chọn
-          </ButtonComponent>
-        )}
-        {current === 4 && (
-          <ButtonComponent
-            rounded
-            onClick={() =>
-              dispatch(
-                openSearchModal("student", (value) =>
-                  onChangeDetail("partner", value.id)
-                )
-              )
-            }
-          >
-            {thesis.partner ? "Chọn lại..." : "Chọn..."}
-          </ButtonComponent>
-        )}
-
-        {current === 5 && (
-          <View style={{ width: "100%", marginTop: 20 }}>
-            <MultiSelectComponent
-              data={lecturers}
-              onChangeSelected={(value) => onChangeDetail("supervisors", value)}
-              selected={thesis?.supervisors}
-              placeholder="Chọn..."
-              maxSelect={2}
-              hide={!thesis.supervisors}
-            />
-          </View>
-        )}
-      </View>
-
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: current === 0 ? "center" : "space-between",
-          marginTop: 20,
-          alignItems: "center",
-        }}
-      >
-        {current !== 0 && (
-          <ButtonComponent
-            onClick={() => {
-              setCurrent((prev) => prev - 1);
-              setError(false);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </ButtonComponent>
-        )}
-        {current !== 0 &&
-          (fields[current].field === "files" ? (
-            <ButtonComponent
-              onClick={() => openFile(file?.uri)}
-              disabled={!file}
-              style={{ container: { width: 180 } }}
-            >
-              {file ? file.name : fields[current].fieldName}
-            </ButtonComponent>
-          ) : (
-            <Text style={{ fontSize: 16, width: 100, textAlign: "center" }}>
-              {fields[current].fieldName}
-            </Text>
-          ))}
-        {current !== 5 ? (
-          <ButtonComponent
-            onClick={() => {
-              let thesisField =
-                fields[current].field === "files"
-                  ? file
-                  : thesis[fields[current].field];
-              if (thesisField || current == 4) {
-                setError(false);
-                setCurrent((prev) => prev + 1);
-              } else setError(true);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faArrowRight} />
-          </ButtonComponent>
-        ) : createThesis ? (
-          <ButtonComponent
-            onClick={() => {
-              if (thesis[fields[current].field].length) {
-                createThesis();
-                setError(false);
-              } else setError(true);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faPlus} />
-          </ButtonComponent>
-        ) : (
-          <ButtonComponent
-            onClick={() => {
-              if (thesis[fields[current].field].length) {
-                updateThesis();
-                setError(false);
-              } else setError(true);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faPen} />
-          </ButtonComponent>
-        )}
-      </View>
-      {error && <Text style={{ color: "red" }}>Nhập thông tin!!!</Text>}
-    </View>
-  );
-};
-
-const ThesisModal = ({ visible, unVisible }) => {
+const ViewModal = ({ visible, unVisible }) => {
   const { file, thesis, updateThesis, pickDocument, onChangeDetail } =
     useContext(ThesisContext);
 
   return (
     <ModalComponent
       content={
-        <Content
+        <ThesisModal
           thesis={thesis}
           onChangeDetail={onChangeDetail}
           file={file}
@@ -471,7 +252,5 @@ const ThesisModal = ({ visible, unVisible }) => {
     />
   );
 };
-
-const styles = StyleSheet.create({});
 
 export default MyThesis;

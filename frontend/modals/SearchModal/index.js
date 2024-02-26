@@ -10,8 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import ButtonComponent from "../ButtonComponent";
-import { useEffect, useRef, useState } from "react";
+import ButtonComponent from "../../components/ButtonComponent";
+import { useEffect, useState } from "react";
 import images from "../../assets/images";
 import useDebounce from "../../hooks/useDebounce";
 import API, { endpoints } from "../../configs/API";

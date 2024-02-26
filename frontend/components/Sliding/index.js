@@ -1,6 +1,6 @@
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -21,6 +21,11 @@ function Sliding({ images, title }) {
         currentIndex === 0 ? images.length - 1 : currentIndex - 1
       );
   };
+
+  useEffect(() => {
+    const intervalId = setInterval((right) => handleClick(right), 5000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <View style={{ height: 520 }}>

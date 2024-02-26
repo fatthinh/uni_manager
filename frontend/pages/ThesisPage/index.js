@@ -5,19 +5,16 @@ import {
   ActivityIndicator,
   Linking,
   SafeAreaView,
-  ScrollView,
-  Alert,
 } from "react-native";
 import DetailLayout from "../../layouts/DetailLayout";
 import InputBox from "../../components/InputBox";
 import ButtonComponent from "../../components/ButtonComponent";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
-import moment from "moment";
 import * as Print from "expo-print";
-import { useFocusEffect } from "@react-navigation/native";
-import ModalComponent from "../../components/ModalComponent";
+import ReviewModal from "./ReviewModal";
+import Reviews from "./Reviews";
 
 function ThesisPage({ navigation, route }) {
   const { thesis, token } = route.params;
@@ -50,7 +47,7 @@ function ThesisPage({ navigation, route }) {
   }, [thesis, token]);
 
   const handleActive = async () => {
-    let response = await authAPIWithoutParams(token).patch(
+    await authAPIWithoutParams(token).patch(
       endpoints.toggleThesis(thesis.id)
     );
     navigation.navigate("ThesesPage", { token: token });
@@ -86,18 +83,22 @@ function ThesisPage({ navigation, route }) {
 
   const createDynamicTable = () => {
     var table = "";
-    if (reviews.length)
+    let total_score = 0;
+    let avg_score;
+    if (reviews.length) {
       reviews.map((review) => {
-        table =
-          table +
-          `
-        <tr>
-          <td>${`${review.author_firstname} ${review.author_lastname}`}</td>
-          <td>${review.author_email}</td>
-          <td>${parseFloat(review.final_score.toFixed(2))}</td>
-        </tr>
-        `;
+        total_score += review.final_score;
+        table += `
+          <tr>
+            <td>${`${review.author_firstname} ${review.author_lastname}`}</td>
+            <td>${review.author_email}</td>
+            <td>${parseFloat(review.final_score.toFixed(2))}</td>
+          </tr>
+          `;
       });
+
+      avg_score = parseFloat((total_score / reviews.length).toFixed(2));
+    }
 
     const html = `
       <!DOCTYPE html>
@@ -165,6 +166,10 @@ function ThesisPage({ navigation, route }) {
           </tr>
           ${table}
         </table>
+
+        <h2>Điểm tổng kết: <span style="font-style: italic">${avg_score}</span> </h2>
+
+        <div style="display: flex; justify-content: flex-end;"><h2>Ký tên</h2></div>
         </body>
       </html>
         `;
@@ -189,7 +194,7 @@ function ThesisPage({ navigation, route }) {
             rounded
             primary
             style={{ container: { width: 200 } }}
-            disabled={thesis.council?.is_active || !thesis.council}
+            disabled={thesis.council?.is_active}
             onClick={print}
           >
             Xuất bảng đánh giá
@@ -232,7 +237,7 @@ function ThesisPage({ navigation, route }) {
         ) : (
           <>
             <ThesisView thesis={thesis} onClickFile={openFile} />
-            <ThesisReviews reviews={reviews} />
+            <Reviews reviews={reviews} />
           </>
         )}
       </DetailLayout>
@@ -250,91 +255,6 @@ function ThesisPage({ navigation, route }) {
     </>
   );
 }
-
-const ReviewModal = ({ myReview, token, thesis, visible, unVisible }) => {
-  const [contentScore, setContentScore] = useState(null);
-  const [presentationScore, setPresentationScore] = useState(null);
-  const [comment, setComment] = useState(null);
-
-  const handleSubmit = async () => {
-    try {
-      if (myReview)
-        await authAPIWithoutParams(token).patch(
-          endpoints.updateReview(thesis.id),
-          {
-            presentation_score: presentationScore,
-            content_score: contentScore,
-            comment: comment,
-          }
-        );
-      else {
-        await authAPIWithoutParams(token).post(endpoints.addReview(thesis.id), {
-          presentation_score: presentationScore,
-          content_score: contentScore,
-          comment: comment,
-        });
-      }
-
-      Alert.alert("Thông báo", "Gửi thành hành công!", [
-        {
-          text: "Thoát",
-          onPress: unVisible,
-        },
-      ]);
-    } catch (error) {
-      console.error("Error submitting review:", error);
-    }
-  };
-
-  useEffect(() => {
-    setContentScore(myReview?.content_score.toString());
-    setPresentationScore(myReview?.presentation_score.toString());
-    setComment(myReview?.comment);
-  }, [myReview]);
-
-  return (
-    <ModalComponent
-      content={
-        <View style={{ marginTop: 20, alignItems: "center" }}>
-          <Text style={{ fontSize: 18 }}>{thesis.title}</Text>
-          <InputBox
-            keyboardType="numeric"
-            label="Điểm nội dung"
-            value={contentScore}
-            onChange={(value) => setContentScore(value)}
-          />
-          <InputBox
-            keyboardType="numeric"
-            label="Điểm trình bày"
-            value={presentationScore}
-            onChange={(value) => setPresentationScore(value)}
-          />
-          <InputBox
-            label="Nhận xét"
-            multiline
-            style={{
-              inputBox: { height: 120 },
-              input: { paddingVertical: 16 },
-            }}
-            value={comment}
-            onChange={(text) => setComment(text)}
-          />
-          <ButtonComponent
-            rounded
-            primary
-            style={{ container: { width: 260, height: 50, marginTop: 20 } }}
-            onClick={handleSubmit}
-          >
-            Gửi
-          </ButtonComponent>
-        </View>
-      }
-      title="Đánh giá"
-      unVisible={unVisible}
-      visible={visible}
-    />
-  );
-};
 
 const ThesisView = ({ thesis, onClickFile }) => {
   return (
@@ -399,67 +319,6 @@ const ThesisView = ({ thesis, onClickFile }) => {
           ))}
         </View>
       </View>
-    </View>
-  );
-};
-
-const ThesisReviews = ({ reviews }) => {
-  return (
-    <View
-      style={{
-        width: "100%",
-        padding: 8,
-        backgroundColor: "#ccc",
-        opacity: 0.6,
-        borderRadius: 8,
-        height: reviews.length ? 114 : 40,
-      }}
-    >
-      <View style={{}}>
-        {reviews.length ? (
-          <>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text style={{ color: "blue", fontSize: 16, marginVertical: 10 }}>
-                Các đánh giá
-              </Text>
-            </View>
-            <View style={{ height: 62 }}>
-              <ScrollView>
-                {reviews.map((review, index) => (
-                  <Review review={review} key={index} />
-                ))}
-              </ScrollView>
-            </View>
-          </>
-        ) : (
-          <Text style={{ color: "blue", fontSize: 16 }}>Không có đánh giá</Text>
-        )}
-      </View>
-    </View>
-  );
-};
-
-const Review = ({ review }) => {
-  return (
-    <View
-      style={{
-        position: "relative",
-      }}
-    >
-      <Text>{`${review.author_firstname} ${review.author_lastname}`}</Text>
-      <Text>{`${review.comment} | Điểm đánh giá: ${parseFloat(
-        review.final_score.toFixed(2)
-      )}`}</Text>
-      <Text></Text>
-      <Text style={{ position: "absolute", right: 0, bottom: 0 }}>
-        {`Đã đánh giá ${moment(review.updated_at).fromNow()}`}
-      </Text>
     </View>
   );
 };

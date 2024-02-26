@@ -4,16 +4,28 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadLecturersName } from "../../redux/actions/loadPublicActions";
 import Sliding from "../../components/Sliding";
-import SearchModal from "../../components/SearchModal";
-import { Button } from "react-native";
-import RemoveModal from "../../components/RemoveModal";
-import { openRemoveModal } from "../../redux/actions/removeModal";
+import SearchModal from "../../modals/SearchModal";
+import RemoveModal from "../../modals/RemoveModal";
 
 const items = [
-  { title: "slide1", src: images.home_slide1, content: "content 1" },
-  { title: "slide2", src: images.home_slide2, content: "content 2" },
-  { title: "slide3", src: images.home_slide3, content: "content 3" },
-  { title: "slide4", src: images.home_slide4, content: "content 4" },
+  {
+    title: "slide1",
+    src: images.home_slide1,
+    content:
+      "Trường Đại học Mở Thành phố Hồ Chí Minh họp mặt Tân niên Xuân Giáp Thìn năm 2024",
+  },
+  {
+    title: "slide2",
+    src: images.home_slide2,
+    content:
+      "Thông báo điều chỉnh và bổ sung lịch thi đại học chính quy học kỳ 1 năm học 2023-2024",
+  },
+  {
+    title: "slide3",
+    src: images.home_slide3,
+    content:
+      "Hội thảo định hướng chương trình thực tập tại Nhật Bản dành cho sinh viên ngành Công Nghệ Thông Tin và Ngoại Ngữ",
+  },
 ];
 
 function HomePage() {

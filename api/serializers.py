@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import User, Council, CouncilMembership, Thesis, Review
 from django.contrib.auth.models import Group
+from django.conf import settings
+from django.core.mail import send_mail
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,6 +22,13 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.Meta.model(**validated_data)
         user.set_password(user_password)
         user.save()
+
+        # send email
+        subject = "OU"
+        message = f'Chào {user.last_name},\n Nhà trường cấp cho bạn tài khoản:\n username: {user.username} và mật khẩu: {user_password}'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [user.email, ]
+        send_mail(subject, message, email_from, recipient_list)
 
         role = validated_data.get('role')
         user.groups.add(Group.objects.get(name__icontains=role))

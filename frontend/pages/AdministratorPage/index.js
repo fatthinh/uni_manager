@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Text, View, ActivityIndicator } from "react-native";
+import { Text, View, ActivityIndicator, Dimensions } from "react-native";
 import DefaultLayout from "../../layouts/DefaultLayout";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +11,9 @@ import DropdownComponent from "../../components/Dropdown";
 import ButtonComponent from "../../components/ButtonComponent";
 import PaginationComponent from "../../components/PaginationComponent";
 import { styles } from "./styles";
+import CreateModal from "./CreateModal";
 
+const SCREEN_WIDTH = Dimensions.get("window").width;
 const ROLES = [
   { label: "Sinh viên", value: "student" },
   { label: "Giảng viên", value: "lecturer" },
@@ -26,6 +28,7 @@ function AdministratorPage({ route, navigation }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
   const [users, setUsers] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const handleSearch = (value) => {
     setSearchValue(value);
@@ -64,75 +67,80 @@ function AdministratorPage({ route, navigation }) {
   }, [currentPage, searchValue, filterValue]);
 
   return (
-    <DefaultLayout>
-      <View style={styles.actions}>
-        <ButtonComponent
-          outline
-          style={{ container: { marginBottom: -8 } }}
-          onClick={() =>
-            navigation.navigate("CreateAccountPage", { token: token })
-          }
-        >
-          Thêm tài khoản
-        </ButtonComponent>
-      </View>
-      <View style={styles.filterContainer}>
-        <InputBox
-          label="Tìm kiếm"
-          icon={
-            <FontAwesomeIcon icon={faXmarkCircle} style={styles.searchIcon} />
-          }
-          value={searchValue}
-          onChange={handleSearch}
-          removeIcon={true}
-          style={{
-            inputBox: {
-              width: (SCREEN_WIDTH - 24) * 0.6,
-              marginTop: 0,
-            },
-          }}
-        />
-        <DropdownComponent
-          data={ROLES}
-          value={filterValue}
-          onChange={handleFilter}
-          style={styles.dropdown}
-        />
-      </View>
-      <View style={styles.usersContainer}>
-        <View style={styles.usersHeader}>
-          <View style={{ flex: 1 }}>
-            <FontAwesomeIcon icon={faUser} />
-          </View>
-          <Text style={{ flex: 3 }}>Tên tài khoản</Text>
-          <Text style={{ flex: 3.5 }}>Họ và tên</Text>
-          <Text style={{ flex: 3 }}>Vai trò</Text>
+    <>
+      <DefaultLayout>
+        <View style={styles.actions}>
+          <ButtonComponent
+            outline
+            style={{ container: { marginBottom: -8 } }}
+            onClick={() => setModalVisible(true)}
+          >
+            Thêm tài khoản
+          </ButtonComponent>
         </View>
-        {users.length ? (
-          <>
-            {users.map((user, index) => (
-              <UserItem
-                user={user}
-                key={index}
-                style={{
-                  container: {
-                    borderColor: "#0c56d0",
-                  },
-                }}
-                onPress={goToDetail}
-              />
-            ))}
-          </>
-        ) : (
-          <ActivityIndicator />
-        )}
-      </View>
-      <PaginationComponent
-        totalPages={totalPages}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
+        <View style={styles.filterContainer}>
+          <InputBox
+            label="Tìm kiếm"
+            icon={
+              <FontAwesomeIcon icon={faXmarkCircle} style={styles.searchIcon} />
+            }
+            value={searchValue}
+            onChange={handleSearch}
+            removeIcon={true}
+            style={{
+              inputBox: {
+                width: (SCREEN_WIDTH - 24) * 0.6,
+                marginTop: 0,
+              },
+            }}
+          />
+          <DropdownComponent
+            data={ROLES}
+            value={filterValue}
+            onChange={handleFilter}
+            style={styles.dropdown}
+          />
+        </View>
+        <View style={styles.usersContainer}>
+          <View style={styles.usersHeader}>
+            <View style={{ flex: 1 }}>
+              <FontAwesomeIcon icon={faUser} />
+            </View>
+            <Text style={{ flex: 3 }}>Tên tài khoản</Text>
+            <Text style={{ flex: 3.5 }}>Họ và tên</Text>
+            <Text style={{ flex: 3 }}>Vai trò</Text>
+          </View>
+          {users.length ? (
+            <>
+              {users.map((user, index) => (
+                <UserItem
+                  user={user}
+                  key={index}
+                  style={{
+                    container: {
+                      borderColor: "#0c56d0",
+                    },
+                  }}
+                  onPress={goToDetail}
+                />
+              ))}
+            </>
+          ) : (
+            <ActivityIndicator />
+          )}
+        </View>
+        <PaginationComponent
+          totalPages={totalPages}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+      </DefaultLayout>
+      <CreateModal
+        visible={modalVisible}
+        unVisible={() => setModalVisible(false)}
+        token={token}
       />
-    </DefaultLayout>
+    </>
   );
 }
 

@@ -7,6 +7,7 @@ const baseConfig = {
 export const endpoints = {
   users: "users/",
   user: (userId) => `users/${userId}/`,
+  changePassword: "users/change-password/",
   currentUser: "users/current-user/",
   theses: "theses/",
   notActiveTheses: "theses/not-active/",

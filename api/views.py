@@ -3,7 +3,7 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, status, permissions, parsers
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -15,8 +15,7 @@ from django.db.models import Q, F, Value, Avg
 from django.db.models.functions import Concat
 from django.conf import settings
 from django.core.mail import send_mail
-
-# Create your views here.
+from django.contrib.auth import authenticate
 
 
 class UserViewset(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.RetrieveUpdateDestroyAPIView):
@@ -36,11 +35,16 @@ class UserViewset(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
 
     @action(methods=['patch'], detail=False, url_path='change-password')
     def change_password(self, request):
-        newPw = request.data.get('password')
         user = get_object_or_404(User, pk=request.user.id)
-        user.set_password(newPw)
-        user.save()
-        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+
+        oldPw = request.data.get('password')
+        newPw = request.data.get('new_password')
+
+        if authenticate(request, username=user.username, password=oldPw):
+            user.set_password(newPw)
+            user.save()
+            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        return Response({'message': 'wrong password'}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
         queries = self.queryset
@@ -78,18 +82,20 @@ class CouncilViewset(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
         council = self.get_object()
         council.is_active = not council.is_active
         council.save()
-        theses = Thesis.objects.filter(council=council)
-        for thesis in theses:
-            reviews = Review.objects.filter(thesis=thesis)
-            average_score = reviews.aggregate(
-                avg_score=Avg('final_score'))['avg_score']
+        if not council.is_active:
+            theses = Thesis.objects.filter(council=council)
+            for thesis in theses:
+                reviews = Review.objects.filter(thesis=thesis)
+                if reviews:
+                    average_score = reviews.aggregate(
+                        avg_score=Avg('final_score'))['avg_score']
 
-            for student in thesis.students.all():
-                subject = "KẾT QUẢ KHÓA LUẬN TỐT NGHIỆP"
-                message = f'Hi {student.last_name}, Kết quả bài khóa luận: {round(average_score, 2)}'
-                email_from = settings.EMAIL_HOST_USER
-                recipient_list = [student.email, ]
-                send_mail(subject, message, email_from, recipient_list)
+                    for student in thesis.students.all():
+                        subject = "KẾT QUẢ KHÓA LUẬN TỐT NGHIỆP"
+                        message = f'Hi {student.last_name}, Kết quả bài khóa luận: {round(average_score, 2)}'
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = [student.email, ]
+                        send_mail(subject, message, email_from, recipient_list)
 
         return Response(council.is_active)
 

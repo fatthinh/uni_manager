@@ -28,6 +28,7 @@ const COUNCIL_ROLES = [
 function CouncilDetail({ council, handleToggleLock, token }) {
   const dispatch = useDispatch();
   const [current, setCurrent] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   // use for council detail
   const [dropdownTheses, setDropdownTheses] = useState([]);
@@ -133,6 +134,7 @@ function CouncilDetail({ council, handleToggleLock, token }) {
     loadDropdownTheses();
     loadMembers();
     loadTheses();
+    setLoading(false);
   }, [council]);
 
   return (
@@ -150,9 +152,18 @@ function CouncilDetail({ council, handleToggleLock, token }) {
             primary
             rounded
             style={{ container: { height: 50, marginVertical: 20 } }}
-            onClick={handleToggleLock}
+            onClick={() => {
+              handleToggleLock();
+              setLoading(true);
+            }}
           >
-            {council.is_active ? "Khóa hội đồng" : "Mở hội đồng"}
+            {loading ? (
+              <ActivityIndicator />
+            ) : council.is_active ? (
+              "Khóa hội đồng"
+            ) : (
+              "Mở hội đồng"
+            )}
           </ButtonComponent>
         </>
       )}

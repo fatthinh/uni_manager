@@ -6,7 +6,6 @@ import LoginPage from "./pages/LoginPage";
 import UserButton from "./components/UserButton";
 import AdministratorPage from "./pages/AdministratorPage";
 import AccountPage from "./pages/AccountPage";
-import CreateAccountPage from "./pages/CreateAccountPage";
 import ThesesPage from "./pages/ThesesPage";
 import ThesisPage from "./pages/ThesisPage";
 import CouncilsPage from "./pages/CouncilsPage";
@@ -20,7 +19,6 @@ import LecturerTheses from "./pages/Lecturer/LecturerTheses";
 import PlotPage from "./pages/PlotPage";
 import MessagesPage from "./pages/MessagesPage";
 import InboxPage from "./pages/InboxPage";
-import MyThesisPage from "./pages/ThesisPage/MyThesisPage";
 import { ModalPortal } from "react-native-modals";
 
 const Drawer = createDrawerNavigator();
@@ -61,18 +59,8 @@ export default function App() {
       options: { headerShown: false },
     },
     {
-      name: "CreateAccountPage",
-      component: CreateAccountPage,
-      options: { headerShown: false },
-    },
-    {
       name: "ThesisPage",
       component: ThesisPage,
-      options: { headerShown: false },
-    },
-    {
-      name: "MyThesisPage",
-      component: MyThesisPage,
       options: { headerShown: false },
     },
     {

@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import DetailLayout from "../../layouts/DetailLayout";
 import { useNavigation } from "@react-navigation/native";
-import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
-import ButtonComponent from "../../components/ButtonComponent";
+import { ActivityIndicator, Image, Text, View } from "react-native";
 import images from "../../assets/images";
-import InputBox from "../../components/InputBox";
-import DropdownComponent from "../../components/Dropdown";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
 import { styles } from "./styles";
+import ButtonComponent from "../../components/ButtonComponent";
+import InputBox from "../../components/InputBox";
+import DropdownComponent from "../../components/Dropdown";
+import ModalComponent from "../../components/ModalComponent";
 
 const ROLES = [
   { label: "Sinh viên", value: "STUDENT" },
@@ -81,6 +82,7 @@ function BaseComponent({
                   backgroundColor: "red",
                 },
               }}
+              onClick={handleChangePassword}
             >
               Đổi mật khẩu
             </ButtonComponent>

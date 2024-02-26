@@ -1,7 +1,7 @@
-import ModalComponent from "./ModalComponent";
+import ModalComponent from "../../components/ModalComponent";
+import ButtonComponent from "../../components/ButtonComponent";
+import { closeRemoveModal } from "../../redux/actions/removeModal";
 import { View } from "react-native";
-import { closeRemoveModal } from "../redux/actions/removeModal";
-import ButtonComponent from "./ButtonComponent";
 import { useDispatch } from "react-redux";
 
 function RemoveModal({ onRemove, visible }) {
