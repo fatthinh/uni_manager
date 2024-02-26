@@ -3,7 +3,7 @@ import {
   CLOSE_SEARCH_MODAL,
   OPEN_REMOVE_MODAL,
   OPEN_SEARCH_MODAL,
-} from "../constants/modals";
+} from "../constants/modalConstants";
 
 export const searchReducer = (state = { visible: false }, action) => {
   switch (action.type) {
