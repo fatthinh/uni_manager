@@ -30,7 +30,7 @@ function SearchModal({ visible, onClickModalItem, filter }) {
       filter: filter,
     };
     let response = await API.get(endpoints.publicUsers, { params: params });
-    setSearchResult(response.data);
+    setSearchResult(response.data.results);
   };
 
   useEffect(() => {

@@ -31,7 +31,6 @@ function MessagesPage({ navigation, route }) {
   const rooms = useFirestore("rooms", condition);
 
   const onClickModalItem = async (partner) => {
-    console.log(partner);
     let partnerInfo = {
       id: partner.id,
       name: partner.get_full_name,

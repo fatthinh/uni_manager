@@ -125,7 +125,7 @@ function BaseComponent({
       {user === null ? (
         <ActivityIndicator />
       ) : (
-        <>
+        <View style={{ marginTop: 26 }}>
           <View style={styles.header}>
             <ButtonComponent
               style={styles.avatarContainer}
@@ -187,7 +187,7 @@ function BaseComponent({
               />
             </View>
           </View>
-        </>
+        </View>
       )}
     </DetailLayout>
   );

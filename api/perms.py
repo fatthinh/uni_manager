@@ -1,11 +1,6 @@
 from rest_framework import permissions
 from django.contrib.auth.models import Group
 
-
-# class MyAccount(permissions.IsAuthenticated):
-#     def has_object_permission(self, request, view, obj):
-#         return self.has_permission(request, view) and request.user == obj.user
-
 class OwnerAuthenticated(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         print(obj.students)

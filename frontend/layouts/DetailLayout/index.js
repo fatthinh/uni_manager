@@ -1,4 +1,3 @@
-import { faCopyright } from "@fortawesome/free-regular-svg-icons";
 import {
   faAngleDown,
   faAngleUp,
@@ -13,16 +12,11 @@ import {
   Text,
   ScrollView,
   KeyboardAvoidingView,
-  Keyboard,
   Platform,
 } from "react-native";
 import ButtonComponent from "../../components/ButtonComponent";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-const SCREEN_HEIGHT =
-  Platform.OS === "ios"
-    ? Dimensions.get("screen").height
-    : Dimensions.get("window").height;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 function DetailLayout({
   children,
@@ -61,9 +55,9 @@ function DetailLayout({
         style={[
           customStyles && customStyles.children,
           actionsShow
-            ? { height: SCREEN_HEIGHT - 180 }
-            : { height: SCREEN_HEIGHT - 120 },
-          !childrenActions && { height: SCREEN_HEIGHT - 114 },
+            ? { height: SCREEN_HEIGHT - 150 }
+            : { height: SCREEN_HEIGHT - 110 },
+          !childrenActions && { height: SCREEN_HEIGHT - 80 },
         ]}
       >
         {/* <ScrollView style={{ flex: 1, paddingHorizontal: 12, width: "100%" }}> */}
@@ -72,25 +66,34 @@ function DetailLayout({
         </KeyboardAvoidingView>
         {/* </ScrollView> */}
       </View>
-      <View style={{alignItems:"center"}}>
-        {childrenActions && (
-          <ButtonComponent
+      {childrenActions && (
+        <>
+          <View
             style={{
-              container: {
-                paddingVertical: 0,
-                height: 40,
-                width: 80,
-              },
+              alignItems: "center",
             }}
-            onClick={() => setActionShow((prev) => !prev)}
           >
-            <FontAwesomeIcon icon={actionsShow ? faAngleDown : faAngleUp} />
-          </ButtonComponent>
-        )}
-      </View>
-      <View style={[styles.actions, customStyles && customStyles.actions]}>
-        {childrenActions}
-      </View>
+            <ButtonComponent
+              style={{
+                container: {
+                  paddingVertical: 0,
+                  width: 80,
+                },
+              }}
+              onClick={() => setActionShow((prev) => !prev)}
+            >
+              <FontAwesomeIcon icon={actionsShow ? faAngleDown : faAngleUp} />
+            </ButtonComponent>
+          </View>
+          {actionsShow && (
+            <View
+              style={[styles.actions, customStyles && customStyles.actions]}
+            >
+              {childrenActions}
+            </View>
+          )}
+        </>
+      )}
     </View>
   );
 }
@@ -98,7 +101,7 @@ function DetailLayout({
 const styles = StyleSheet.create({
   container: {
     height: SCREEN_HEIGHT,
-    backgroundColor: "#fff",
+    backgroundColor: "#fff"
   },
   header: {
     height: 80,
@@ -114,6 +117,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     justifyContent: "flex-end",
+    height: 50,
   },
   textColor: {
     color: "#fff",

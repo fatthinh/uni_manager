@@ -393,6 +393,7 @@ class ThesisViewset(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveUpd
 class PublicUserViewset(viewsets.ViewSet, generics.ListAPIView):
     serializer_class = PublicUserSerializer
     queryset = User.objects.all()
+    pagination_class = paginators.UserPaginator
 
     def get_queryset(self):
         queries = self.queryset

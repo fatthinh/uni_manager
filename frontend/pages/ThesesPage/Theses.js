@@ -55,7 +55,7 @@ const Theses = ({ onClickItem, theses, loadTheses, active = undefined }) => {
           <Text style={{ flex: 3 }}>Ngày tạo</Text>
           <Text style={{ flex: 3 }}>Trạng thái</Text>
         </View>
-        <View style={{ height: 420 }}>
+        <View style={{ height: 460 }}>
           {theses.length ? (
             <>
               {theses.map((thesis) => (

@@ -48,11 +48,10 @@ function CreateModal({ visible, unVisible, token }) {
         setErrorStyle(true);
       }
     } catch (error) {
-      console.error("Error during API request:", error);
       Alert.alert(
         "Lỗi",
         "Đã có lỗi xảy ra trong quá trình xử lý. Vui lòng thử lại sau.",
-        [{ text: "OK", onPress: () => {} }],
+        [{ text: "OK", onPress: () => setErrorStyle(false) }],
         { cancelable: false }
       );
     }

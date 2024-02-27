@@ -11,7 +11,7 @@ export const loadLecturersName = () => async (dispatch) => {
     let role = "lecturer";
     let response = await API.get(`${endpoints.publicUsers}?filter=${role}`);
 
-    let transformData = response.data.map((user) => ({
+    let transformData = response.data.results.map((user) => ({
       label: user.get_full_name,
       value: user.id,
     }));

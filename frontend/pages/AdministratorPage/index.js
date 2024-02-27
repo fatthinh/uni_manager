@@ -102,26 +102,13 @@ function AdministratorPage({ route, navigation }) {
           />
         </View>
         <View style={styles.usersContainer}>
-          <View style={styles.usersHeader}>
-            <View style={{ flex: 1 }}>
-              <FontAwesomeIcon icon={faUser} />
-            </View>
-            <Text style={{ flex: 3 }}>Tên tài khoản</Text>
-            <Text style={{ flex: 3.5 }}>Họ và tên</Text>
-            <Text style={{ flex: 3 }}>Vai trò</Text>
-          </View>
           {users.length ? (
             <>
               {users.map((user, index) => (
                 <UserItem
-                  user={user}
+                  item={user}
                   key={index}
-                  style={{
-                    container: {
-                      borderColor: "#0c56d0",
-                    },
-                  }}
-                  onPress={goToDetail}
+                  onPressUserItem={() => goToDetail(user.id)}
                 />
               ))}
             </>

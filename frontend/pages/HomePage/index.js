@@ -39,7 +39,7 @@ function HomePage() {
 
   return (
     <DefaultLayout>
-      <Sliding images={items} title="Thông báo/Tin tức" />
+      <Sliding images={items} title="Thông báo/Tin tức" auto/>
       <SearchModal
         visible={searchModal.visible}
         filter={searchModal.filter}

@@ -12,6 +12,7 @@ function MultiSelectComponent({
   disabled,
   hide,
   maxSelect,
+  onChangeText,
 }) {
   const renderItem = (item) => {
     return (
@@ -35,7 +36,7 @@ function MultiSelectComponent({
         valueField="value"
         placeholder={placeholder}
         value={selected}
-        search={data.length > 4}
+        search
         searchPlaceholder="Search..."
         onChange={(items) => {
           onChangeSelected(items);
@@ -52,6 +53,7 @@ function MultiSelectComponent({
         visibleSelectedItem={!hide}
         disable={disabled}
         maxSelect={maxSelect}
+        onChangeText={(text) => onChangeText(text)}
       />
     </>
   );

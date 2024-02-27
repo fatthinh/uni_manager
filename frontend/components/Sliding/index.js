@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 
-function Sliding({ images, title }) {
+function Sliding({ images, title, auto }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleClick = (right) => {
@@ -23,8 +23,10 @@ function Sliding({ images, title }) {
   };
 
   useEffect(() => {
-    const intervalId = setInterval((right) => handleClick(right), 5000);
-    return () => clearInterval(intervalId);
+    if (auto) {
+      const intervalId = setInterval((right) => handleClick(right), 5000);
+      return () => clearInterval(intervalId);
+    }
   }, []);
 
   return (
@@ -76,7 +78,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: SCREEN_WIDTH - 24,
-    height: SCREEN_WIDTH - 50,
+    height: SCREEN_WIDTH - 104,
     objectFit: "fill",
     borderRadius: 12,
     zIndex: -1000,

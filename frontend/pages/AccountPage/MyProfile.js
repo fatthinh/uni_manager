@@ -74,7 +74,14 @@ function MyProfile({ route, navigation }) {
 
   const handleChangePassword = async () => {
     try {
-      if (newPassword && confirmNewPassword) {
+      if (newPassword !== confirmNewPassword) {
+        Alert.alert("Thông báo", "Xác nhận lại mật khẩu!", [
+          {
+            text: "Thoát",
+            onPress: () => {},
+          },
+        ]);
+      } else if (newPassword && confirmNewPassword) {
         const response = await authAPIWithoutParams(token).patch(
           endpoints.changePassword,
           {
@@ -91,13 +98,6 @@ function MyProfile({ route, navigation }) {
         setConfirmNewPassword("");
         setOldPassword("");
         setNewPassword("");
-      } else if (newPassword !== confirmNewPassword) {
-        Alert.alert("Thông báo", "Xác nhận lại mật khẩu!", [
-          {
-            text: "Thoát",
-            onPress: () => {},
-          },
-        ]);
       }
     } catch (error) {
       Alert.alert("Thông báo", "Đổi mật khẩu không thành công!", [

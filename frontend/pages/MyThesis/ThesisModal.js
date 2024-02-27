@@ -3,7 +3,7 @@ import InputBox from "../../components/InputBox";
 import DropdownComponent from "../../components/Dropdown";
 import MultiSelectComponent from "../../components/MultiSelectComponent";
 import { Dimensions, Linking, Text, View } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,6 +13,9 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { openSearchModal } from "../../redux/actions/searchModal";
+import API, { endpoints } from "../../configs/API";
+import { searchReducer } from "../../redux/reducers/modalReducers";
+import useDebounce from "../../hooks/useDebounce";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const MAJORS = [
@@ -31,6 +34,39 @@ function ThesisModal({
   updateThesis,
 }) {
   const dispatch = useDispatch();
+  const [lecturerSearch, setLecturerSearch] = useState("");
+  const [lecturers, setLecturers] = useState([]);
+  const debounceValue = useDebounce(lecturerSearch, 500);
+
+  const onChangeLecturerSearch = (text) => {
+    setLecturerSearch(text);
+  };
+
+  const loadLecturers = async () => {
+    try {
+      let params = {
+        search: debounceValue,
+        filter: "lecturer",
+      };
+      let response = await API.get(endpoints.publicUsers, { params: params });
+
+      let transformData = response.data.results.map((user) => ({
+        label: user.get_full_name,
+        value: user.id,
+      }));
+
+      console.log(transformData);
+
+      setLecturers(transformData);
+    } catch (error) {
+      setLecturers([]);
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    loadLecturers();
+  }, [debounceValue]);
 
   const openFile = (fileUrl) => {
     console.log(fileUrl);
@@ -44,7 +80,6 @@ function ThesisModal({
   };
 
   const [current, setCurrent] = useState(0);
-  const { lecturers } = useSelector((state) => state.lecturersInfo);
   const fields = [
     { field: "title", fieldName: "" },
     { field: "major", fieldName: "Ngành" },
@@ -139,6 +174,7 @@ function ThesisModal({
               placeholder="Chọn..."
               maxSelect={2}
               hide={!thesis.supervisors}
+              onChangeText={onChangeLecturerSearch}
             />
           </View>
         )}

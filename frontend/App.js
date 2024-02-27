@@ -96,6 +96,7 @@ export default function App() {
             drawerStyle: {
               paddingTop: 50,
               backgroundColor: "#0c56d0",
+              color: "#fff"
             },
             headerStyle: {
               height: 80,
@@ -160,7 +161,7 @@ const MyDrawerItem = () => {
     {
       label: "Thống Kê",
       screen: "PlotPage",
-      condition: userInfo,
+      condition: userInfo?.role==="MANAGER" || userInfo?.role==="PROVOST",
     },
   ];
 
@@ -182,6 +183,7 @@ const MyDrawerItem = () => {
               key={label}
               label={label}
               onPress={() => navigation.navigate(screen, { token: token })}
+              labelStyle={{color:"#fff"}}
             />
           )
       )}

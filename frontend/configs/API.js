@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseConfig = {
-  baseURL: "http://192.168.1.42:8000/api/",
+  baseURL: "http://192.168.5.199:8000/api/",
 };
 
 export const endpoints = {
@@ -36,6 +36,7 @@ export const endpoints = {
   lecturerCouncils: "councils/lecturer-councils/",
   lecturerTheses: (councilId) => `councils/${councilId}/lecturer-theses/`,
   myReview: (thesisId) => `theses/${thesisId}/my-review/`,
+  plot: "plot/",
 };
 
 const createAuthAPI = (accessToken, params = {}) =>

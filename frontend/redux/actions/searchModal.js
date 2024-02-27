@@ -1,7 +1,7 @@
 import {
   CLOSE_SEARCH_MODAL,
   OPEN_SEARCH_MODAL,
-} from "../constants/modalConstantss";
+} from "../constants/modalConstants";
 
 export const openSearchModal = (filter, onClickItem) => (dispatch) => {
   dispatch({

@@ -60,6 +60,6 @@ export const styles = StyleSheet.create({
     fontSize: 12,
   },
   usersContainer: {
-    height: 430,
+    height: 510,
   },
 });
