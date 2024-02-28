@@ -11,14 +11,6 @@ import {
   ModalTitle,
   SlideAnimation,
 } from "react-native-modals";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  View,
-} from "react-native";
-import ButtonComponent from "../ButtonComponent";
 
 function ModalComponent({ visible, unVisible, content, title }) {
   return (
@@ -40,18 +32,6 @@ function ModalComponent({ visible, unVisible, content, title }) {
             borderColor: "#ccc",
           }}
         />
-      }
-      footer={
-        <ModalFooter style={{ justifyContent: "center" }}>
-          <ButtonComponent
-            style={{
-              children: { marginHorizontal: 0 },
-            }}
-            onClick={unVisible}
-          >
-            <FontAwesomeIcon icon={faAngleDoubleDown} />
-          </ButtonComponent>
-        </ModalFooter>
       }
     >
       <ModalContent style={{ zIndex: 1000000 }}>{content}</ModalContent>

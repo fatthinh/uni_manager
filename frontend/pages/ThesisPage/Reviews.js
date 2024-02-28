@@ -5,12 +5,8 @@ function Reviews({ reviews }) {
   return (
     <View
       style={{
-        width: "100%",
-        padding: 8,
-        backgroundColor: "#ccc",
+        padding: 14,
         opacity: 0.6,
-        borderRadius: 8,
-        height: reviews.length ? 114 : 40,
       }}
     >
       <View style={{}}>
@@ -23,16 +19,11 @@ function Reviews({ reviews }) {
                 justifyContent: "space-between",
               }}
             >
-              <Text style={{ color: "blue", fontSize: 16, marginVertical: 10 }}>
-                Các đánh giá
-              </Text>
             </View>
-            <View style={{ height: 62 }}>
-              <ScrollView>
+            <View style={{ }}>
                 {reviews.map((review, index) => (
                   <Review review={review} key={index} />
                 ))}
-              </ScrollView>
             </View>
           </>
         ) : (

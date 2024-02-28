@@ -7,14 +7,20 @@ import {
   Text,
   View,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent";
-import { authAPIWithoutParams, endpoints } from "../../configs/API";
+import API, { authAPIWithoutParams, endpoints } from "../../configs/API";
 import ThesisItem from "../ThesesPage/ThesisItem";
 import MultiSelectComponent from "../../components/MultiSelectComponent";
 import DropdownComponent from "../../components/Dropdown";
-import { openRemoveModal } from "../../redux/actions/removeModal";
+import {
+  closeRemoveModal,
+  openRemoveModal,
+} from "../../redux/actions/removeModal";
+import useDebounce from "../../hooks/useDebounce";
+import { openSearchModal } from "../../redux/actions/searchModal";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -32,8 +38,6 @@ function CouncilDetail({ council, handleToggleLock, token }) {
 
   // use for council detail
   const [dropdownTheses, setDropdownTheses] = useState([]);
-  const { lecturers } = useSelector((state) => state.lecturersInfo);
-
   const [members, setMembers] = useState([]);
   const [theses, setTheses] = useState([]);
 
@@ -82,11 +86,10 @@ function CouncilDetail({ council, handleToggleLock, token }) {
 
   const updateMembers = async (selected) => {
     try {
-      console.log(selected);
       await authAPIWithoutParams(token).post(
         endpoints.updateCouncilMembers(council.id),
         {
-          members: selected,
+          members: selected.map((item) => item.user),
         }
       );
       loadMembers();
@@ -94,6 +97,7 @@ function CouncilDetail({ council, handleToggleLock, token }) {
       console.error(ex);
     }
   };
+  console.log(members);
 
   const updateTheses = async (selected) => {
     try {
@@ -113,8 +117,8 @@ function CouncilDetail({ council, handleToggleLock, token }) {
     let selected = theses
       .filter((thesis) => thesis.id !== thesisToRemove)
       .map((thesis) => thesis.id);
-    console.log(selected);
     updateTheses(selected);
+    dispatch(closeRemoveModal());
   };
 
   const onChangeRole = (id, role) => {
@@ -139,6 +143,23 @@ function CouncilDetail({ council, handleToggleLock, token }) {
 
   return (
     <View style={{ width: SCREEN_WIDTH * 0.85 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: current !== 1 ? "center" : "space-between",
+        }}
+      >
+        {current !== 0 && (
+          <ButtonComponent onClick={() => setCurrent((prev) => prev - 1)}>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </ButtonComponent>
+        )}
+        {current !== 2 && (
+          <ButtonComponent onClick={() => setCurrent((prev) => prev + 1)}>
+            <FontAwesomeIcon icon={faArrowRight} />
+          </ButtonComponent>
+        )}
+      </View>
       {current === 0 && (
         <>
           <Text style={styles.title}>{council.name}</Text>
@@ -194,20 +215,50 @@ function CouncilDetail({ council, handleToggleLock, token }) {
                     roles={COUNCIL_ROLES}
                     onChangeRole={(role) => onChangeRole(info.user, role)}
                     key={info.id}
+                    onLongPress={() =>
+                      dispatch(
+                        openRemoveModal(() => {
+                          updateMembers(
+                            members.filter(
+                              (member) => member.user !== info.user
+                            )
+                          );
+                          dispatch(closeRemoveModal());
+                        })
+                      )
+                    }
                   />
                 ))}
               </>
             )}
           </View>
           <View style={{ width: "100%" }}>
-            <MultiSelectComponent
+            {/* <MultiSelectComponent
               data={lecturers}
               selected={members.map((member) => member.user)}
               onChangeSelected={updateMembers}
               placeholder="Thành viên hội đồng..."
               hide
               maxSelect={5}
-            />
+              onChangeText={onChangeLecturerSearch}
+            /> */}
+            <ButtonComponent
+              rounded
+              onClick={() =>
+                dispatch(
+                  openSearchModal("lecturer", (value) =>
+                    updateMembers([
+                      ...members,
+                      {
+                        user: value.id,
+                      },
+                    ])
+                  )
+                )
+              }
+            >
+              Chọn...
+            </ButtonComponent>
           </View>
         </>
       )}
@@ -264,51 +315,36 @@ function CouncilDetail({ council, handleToggleLock, token }) {
           </View>
         </>
       )}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: current !== 1 ? "center" : "space-between",
-        }}
-      >
-        {current !== 0 && (
-          <ButtonComponent onClick={() => setCurrent((prev) => prev - 1)}>
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </ButtonComponent>
-        )}
-        {current !== 2 && (
-          <ButtonComponent onClick={() => setCurrent((prev) => prev + 1)}>
-            <FontAwesomeIcon icon={faArrowRight} />
-          </ButtonComponent>
-        )}
-      </View>
     </View>
   );
 }
 
-const MemberItem = ({ info, roles, onChangeRole }) => {
+const MemberItem = ({ info, roles, onChangeRole, onLongPress }) => {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        paddingHorizontal: 8,
-        alignItems: "center",
-        borderBottomWidth: 1,
-        borderColor: "#0c56d0",
-      }}
-    >
-      <Text style={{ flex: 1, fontSize: 14 }}>{info.user}</Text>
-      <Text style={{ flex: 4, fontSize: 14 }}>
-        {`${info.first_name} ${info.last_name}`}
-      </Text>
-      <View style={{ flex: 5 }}>
-        <DropdownComponent
-          style={{ dropdownContainer: { width: "100%", borderWidth: 0 } }}
-          value={info.council_role}
-          onChange={onChangeRole}
-          data={roles}
-        />
+    <TouchableOpacity onLongPress={onLongPress}>
+      <View
+        style={{
+          flexDirection: "row",
+          paddingHorizontal: 8,
+          alignItems: "center",
+          borderBottomWidth: 1,
+          borderColor: "#0c56d0",
+        }}
+      >
+        <Text style={{ flex: 1, fontSize: 14 }}>{info.user}</Text>
+        <Text style={{ flex: 4, fontSize: 14 }}>
+          {`${info.first_name} ${info.last_name}`}
+        </Text>
+        <View style={{ flex: 5 }}>
+          <DropdownComponent
+            style={{ dropdownContainer: { width: "100%", borderWidth: 0 } }}
+            value={info.council_role}
+            onChange={onChangeRole}
+            data={roles}
+          />
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

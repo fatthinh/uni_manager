@@ -1,49 +1,48 @@
 from rest_framework import permissions
-from django.contrib.auth.models import Group
-
-class OwnerAuthenticated(permissions.IsAuthenticated):
-    def has_object_permission(self, request, view, obj):
-        print(obj.students)
-        return self.has_permission(request, view) and request.user in obj.students
 
 
-class IsStudentOfThesis(permissions.IsAuthenticated):
-    def has_object_permission(self, request, view, obj):
-        # Check if the authenticated user is one of the students associated with the thesis
-        return request.user in obj.students.all()
-
-
-class RolePermissions(permissions.IsAuthenticated):
-    def __init__(self, role):
-        self.role = role
-
+class CouncilPermissions(permissions.IsAuthenticated):
     def has_permission(self, request, view):
-        # Group permissions
-        group = Group.objects.get(name__icontains=self.role)
-        group_permissions = {
-            permission.codename for permission in group.permissions.all()}
+        model = 'council'
 
-        # User permissions
-        user_permissions = request.user.get_all_permissions()
-        user_perms_normalization = {permission_codename.split(
-            '.')[1] for permission_codename in user_permissions}
+        required_permissions = {
+            'GET': request.user.has_perm(f'api.view_{model}'),
+            'PATCH': request.user.has_perm(f'api.change_{model}',),
+            'DELETE': request.user.has_perm(f'api.delete_{model}'),
+            'POST': request.user.has_perm(f'api.add_{model}')
+        }
+        if getattr(view, 'action').__eq__('council_theses') and request.user.role.__eq__("LECTURER"):
+            pk = view.kwargs.get('pk')
+            return int(pk) in list(request.user.councils.all().values_list('id', flat=True))
 
-        for perm in group_permissions:
-            if not perm in user_perms_normalization:
-                return False
-        return True
-
-
-class ProvostPermissions(RolePermissions):
-    def __init__(self):
-        super().__init__('provost')
+        return required_permissions[request.method]
 
 
-class StudentPermissions(RolePermissions):
-    def __init__(self):
-        super().__init__('student')
+class ReviewPermissions(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        model = 'review'
+        required_permissions = {
+            'GET': request.user.has_perm(f'api.view_{model}'),
+            'PATCH': request.user.has_perm(f'api.change_{model}',),
+            'DELETE': request.user.has_perm(f'api.delete_{model}'),
+            'POST': request.user.has_perm(f'api.add_{model}')
+        }
+
+        return required_permissions[request.method]
 
 
-class LecturerPermissions(RolePermissions):
-    def __init__(self):
-        super().__init__('lecturer')
+class ThesisPermissions(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        model = 'thesis'
+
+        if getattr(view, 'action').__eq__('toggle_active'):
+            return request.user.role.__eq__('PROVOST')
+
+        required_permissions = {
+            'GET': request.user.has_perm(f'api.view_{model}'),
+            'PATCH': request.user.has_perm(f'api.change_{model}',),
+            'DELETE': request.user.has_perm(f'api.delete_{model}'),
+            'POST': request.user.has_perm(f'api.add_{model}')
+        }
+
+        return required_permissions[request.method]

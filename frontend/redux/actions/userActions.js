@@ -31,7 +31,7 @@ export const login = (username, password) => async (dispatch) => {
     };
 
     const { data } = await axios.post(
-      "http://192.168.5.199:8000/o/token/",
+      "http://192.168.1.42:8000/o/token/",
       loginData
     );
 

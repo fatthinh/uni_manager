@@ -27,7 +27,7 @@ function MyThesis({ route }) {
         id: data.id,
         title: data.title,
         description: data.description,
-        supervisors: data.supervisors.map((supervisor) => supervisor.id),
+        supervisors: data.supervisors,
         partner: data.students.find((student) => student.id !== userInfo.id),
         major: data.major,
       });
@@ -85,7 +85,10 @@ function MyThesis({ route }) {
   const createThesis = async () => {
     let data = {
       ...thesis,
-      students: thesis.partner ? [thesis.partner, userInfo.id] : [userInfo.id],
+      students: thesis.partner
+        ? [thesis.partner.id, userInfo.id]
+        : [userInfo.id],
+      supervisors: thesis.supervisors.map((supervisor) => supervisor.id),
     };
     try {
       let response = await authAPIWithoutParams(token).post(
@@ -104,7 +107,10 @@ function MyThesis({ route }) {
   const updateThesis = async () => {
     let data = {
       ...thesis,
-      students: thesis.partner ? [thesis.partner, userInfo.id] : [userInfo.id],
+      students: thesis.partner
+        ? [thesis.partner.id, userInfo.id]
+        : [userInfo.id],
+      supervisors: thesis.supervisors.map((supervisor) => supervisor.id),
     };
     try {
       await authAPIWithoutParams(token).patch(
@@ -129,6 +135,8 @@ function MyThesis({ route }) {
   useEffect(() => {
     loadThesis();
   }, [token, updated]);
+
+  console.log(thesis.supervisors)
 
   return (
     <>

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseConfig = {
-  baseURL: "http://192.168.5.199:8000/api/",
+  baseURL: "http://192.168.1.42:8000/api/",
 };
 
 export const endpoints = {
@@ -9,6 +9,7 @@ export const endpoints = {
   user: (userId) => `users/${userId}/`,
   changePassword: "users/change-password/",
   currentUser: "users/current-user/",
+  publicUsers: "public-users/",
   theses: "theses/",
   notActiveTheses: "theses/not-active/",
   activeTheses: "theses/active/",
@@ -22,8 +23,6 @@ export const endpoints = {
   thesisReivews: (thesisId) => `theses/${thesisId}/reviews/`,
   addReview: (thesisId) => `theses/${thesisId}/add-review/`,
   updateReview: (thesisId) => `theses/${thesisId}/update-review/`,
-  publicUsers: "public-users/",
-  publicCouncils: "public-councils/",
   councils: "councils/",
   council: (councilId) => `councils/${councilId}/`,
   councilMembers: (councilId) => `councils/${councilId}/members/`,
@@ -34,7 +33,6 @@ export const endpoints = {
     `councils/${councilId}/update-member-role/`,
   toggleCouncil: (councilId) => `councils/${councilId}/toggle-active/`,
   lecturerCouncils: "councils/lecturer-councils/",
-  lecturerTheses: (councilId) => `councils/${councilId}/lecturer-theses/`,
   myReview: (thesisId) => `theses/${thesisId}/my-review/`,
   plot: "plot/",
 };

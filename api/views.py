@@ -63,11 +63,7 @@ class CouncilViewset(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
     serializer_class = CouncilSerializer
     queryset = Council.objects.all()
     pagination_class = paginators.Paginator
-
-    def get_permissions(self):
-        if self.action in ['lecturer_theses', 'lecturer_councils']:
-            return [perms.LecturerPermissions()]
-        return [perms.ProvostPermissions()]
+    permission_classes = [perms.CouncilPermissions]
 
     def get_queryset(self):
         queries = self.queryset
@@ -170,19 +166,13 @@ class CouncilViewset(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
         data = CouncilSerializer(paginated_councils, many=True).data
         return paginator.get_paginated_response(data)
 
-    @action(methods=['get'], detail=True, url_path='lecturer-theses')
-    def lecturer_theses(self, request, pk):
-        council = self.get_object()
-        if council.is_active:
-            theses = Thesis.objects.filter(council=pk)
-            data = ThesisSerializer(theses, many=True).data
-            return Response(data, status=status.HTTP_200_OK)
-        return Response({'message': 'Council was locked!!'}, status=status.HTTP_423_LOCKED)
-
     @action(methods=['get'], detail=True, url_path='theses')
     def council_theses(self, request, pk):
+        council = self.get_object()
         theses = Thesis.objects.filter(council=pk)
         data = ThesisSerializer(theses, many=True).data
+        if not council.is_active and request.user.role == 'LECTURER':
+            return Response({'message': 'Council was locked!!'}, status=status.HTTP_423_LOCKED)
         return Response(data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True, url_path='update-theses')
@@ -210,13 +200,9 @@ class ThesisViewset(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveUpd
     pagination_class = paginators.Paginator
 
     def get_permissions(self):
-        if self.action in ['add_review', 'update_review']:
-            return [perms.LecturerPermissions()]
-        elif self.action.__eq__('get_reviews') or self.request.method in ['GET', 'PATCH']:
-            return [permissions.IsAuthenticated()]
-        elif self.request.method == 'POST':
-            return [perms.StudentPermissions()]
-        return [perms.ProvostPermissions()]
+        if self.action in ['add_review', 'update_review', 'my_review']:
+            return [perms.ReviewPermissions()]
+        return [perms.ThesisPermissions()]
 
     @action(methods=['post'], url_path='create-thesis', detail=False)
     def create_thesis(self, request):
@@ -305,7 +291,6 @@ class ThesisViewset(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveUpd
         filtered_theses = Thesis.objects.filter(
             is_active=True, council__isnull=True)
         serialized_theses = ThesisSerializer(filtered_theses, many=True).data
-
         return Response(serialized_theses, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True, url_path="toggle-active")

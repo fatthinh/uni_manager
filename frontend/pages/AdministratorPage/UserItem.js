@@ -1,9 +1,12 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import images from "../../assets/images";
 
-function UserItem({ onPressUserItem, item }) {
+function UserItem({ onPressUserItem, item, onLongPressUserItem }) {
   return (
-    <TouchableOpacity onPress={onPressUserItem}>
+    <TouchableOpacity
+      onPress={onPressUserItem}
+      onLongPress={onLongPressUserItem}
+    >
       <View
         style={{
           flexDirection: "row",

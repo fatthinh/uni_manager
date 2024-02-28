@@ -16,7 +16,7 @@ function LecturerTheses({ route, navigation }) {
   const loadTheses = async () => {
     try {
       let response = await authAPIWithoutParams(token).get(
-        endpoints.lecturerTheses(councilId)
+        endpoints.councilTheses(councilId)
       );
       setTheses(response.data);
       return 1;

@@ -5,6 +5,8 @@ import {
   ActivityIndicator,
   Linking,
   SafeAreaView,
+  TouchableOpacity,
+  Modal,
 } from "react-native";
 import DetailLayout from "../../layouts/DetailLayout";
 import InputBox from "../../components/InputBox";
@@ -15,6 +17,7 @@ import { authAPIWithoutParams, endpoints } from "../../configs/API";
 import * as Print from "expo-print";
 import ReviewModal from "./ReviewModal";
 import Reviews from "./Reviews";
+import { faAngleDown, faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 
 function ThesisPage({ navigation, route }) {
   const { thesis, token } = route.params;
@@ -22,6 +25,7 @@ function ThesisPage({ navigation, route }) {
   const [myReview, setMyReview] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [reviewVisible, setReviewVisible] = useState(false);
+  const [reviewsModal, setReviewsModal] = useState(false);
 
   const loadReviews = async () => {
     let response = await authAPIWithoutParams(token).get(
@@ -47,9 +51,7 @@ function ThesisPage({ navigation, route }) {
   }, [thesis, token]);
 
   const handleActive = async () => {
-    await authAPIWithoutParams(token).patch(
-      endpoints.toggleThesis(thesis.id)
-    );
+    await authAPIWithoutParams(token).patch(endpoints.toggleThesis(thesis.id));
     navigation.navigate("ThesesPage", { token: token });
   };
 
@@ -176,36 +178,18 @@ function ThesisPage({ navigation, route }) {
     return html;
   };
 
-  const activedActions = () => {
-    return (
-      <>
-        {userInfo?.role === "LECTURER" ? (
-          <ButtonComponent
-            primary
-            rounded
-            onClick={() => setReviewVisible(true)}
-            style={{ container: { width: 260 } }}
-            disabled={!thesis.council?.is_active}
-          >
-            {myReview ? "Sửa đánh giá" : "Thêm đánh giá"}
-          </ButtonComponent>
-        ) : (
-          <ButtonComponent
-            rounded
-            primary
-            style={{ container: { width: 200 } }}
-            disabled={thesis.council?.is_active}
-            onClick={print}
-          >
-            Xuất bảng đánh giá
-          </ButtonComponent>
-        )}
-      </>
-    );
-  };
-
-  const notActivedActions = () => {
-    return (
+  const actions = () => {
+    return thesis?.is_active ? (
+      <ButtonComponent
+        rounded
+        primary
+        style={{ container: { width: 200 } }}
+        disabled={thesis.council?.is_active}
+        onClick={print}
+      >
+        Xuất bảng đánh giá
+      </ButtonComponent>
+    ) : (
       <ButtonComponent
         rounded
         primary
@@ -228,16 +212,16 @@ function ThesisPage({ navigation, route }) {
             justifyContent: "center",
           },
         }}
-        childrenActions={
-          thesis?.is_active ? activedActions() : notActivedActions()
-        }
+        childrenActions={actions()}
       >
         {thesis === null ? (
           <ActivityIndicator />
         ) : (
           <>
             <ThesisView thesis={thesis} onClickFile={openFile} />
-            <Reviews reviews={reviews} />
+            <ButtonComponent onClick={() => setReviewsModal(true)}>
+              Xem đánh giá
+            </ButtonComponent>
           </>
         )}
       </DetailLayout>
@@ -248,10 +232,56 @@ function ThesisPage({ navigation, route }) {
         visible={reviewVisible}
         unVisible={() => {
           setReviewVisible(false);
+          setReviewsModal(true);
           loadReviews();
           loadMyReview();
         }}
       />
+      <Modal
+        visible={reviewsModal}
+        unVisible={() => setReviewsModal(false)}
+        animationType="slide"
+      >
+        <View style={{ height: "100%" }}>
+          <ButtonComponent
+            leftIcon={faAngleDown}
+            style={{
+              container: { boderColor: "#ccc", borderBottomWidth: 0.4 },
+              leftIcon: { flex: 0.5 },
+              children: {
+                flex: 9.5,
+                textAlign: "center",
+                paddingRight: 10,
+              },
+            }}
+            onClick={() => setReviewsModal(false)}
+          >
+            Đánh giá
+          </ButtonComponent>
+          <Reviews reviews={reviews} />
+          {userInfo?.role === "LECTURER" && (
+            <View
+              style={{
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <ButtonComponent
+                primary
+                rounded
+                onClick={() => {
+                  setReviewVisible(true);
+                  setReviewsModal(false);
+                }}
+                style={{ container: { width: 260, height: 46 } }}
+                disabled={!thesis.council?.is_active}
+              >
+                {myReview ? "Sửa đánh giá" : "Thêm đánh giá"}
+              </ButtonComponent>
+            </View>
+          )}
+        </View>
+      </Modal>
     </>
   );
 }
@@ -291,7 +321,12 @@ const ThesisView = ({ thesis, onClickFile }) => {
         </Text>
         <SafeAreaView style={{ flex: 2 }}>
           <Text style={{ fontSize: 20, fontStyle: "italic", fontWeight: 500 }}>
-            {thesis.council ? thesis.council.name.split("(").pop() : "Chưa có"}
+            {thesis.council
+              ? thesis.council.name.slice(
+                  thesis.council.name.lastIndexOf("(") + 1,
+                  thesis.council.name.lastIndexOf(")")
+                )
+              : "Chưa có"}
           </Text>
         </SafeAreaView>
       </View>

@@ -14,8 +14,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { openSearchModal } from "../../redux/actions/searchModal";
 import API, { endpoints } from "../../configs/API";
-import { searchReducer } from "../../redux/reducers/modalReducers";
 import useDebounce from "../../hooks/useDebounce";
+import UserItem from "../AdministratorPage/UserItem";
+import {
+  closeRemoveModal,
+  openRemoveModal,
+} from "../../redux/actions/removeModal";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const MAJORS = [
@@ -34,42 +38,8 @@ function ThesisModal({
   updateThesis,
 }) {
   const dispatch = useDispatch();
-  const [lecturerSearch, setLecturerSearch] = useState("");
-  const [lecturers, setLecturers] = useState([]);
-  const debounceValue = useDebounce(lecturerSearch, 500);
-
-  const onChangeLecturerSearch = (text) => {
-    setLecturerSearch(text);
-  };
-
-  const loadLecturers = async () => {
-    try {
-      let params = {
-        search: debounceValue,
-        filter: "lecturer",
-      };
-      let response = await API.get(endpoints.publicUsers, { params: params });
-
-      let transformData = response.data.results.map((user) => ({
-        label: user.get_full_name,
-        value: user.id,
-      }));
-
-      console.log(transformData);
-
-      setLecturers(transformData);
-    } catch (error) {
-      setLecturers([]);
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    loadLecturers();
-  }, [debounceValue]);
 
   const openFile = (fileUrl) => {
-    console.log(fileUrl);
     Linking.canOpenURL(fileUrl).then((supported) => {
       if (supported) {
         Linking.openURL(fileUrl);
@@ -95,9 +65,86 @@ function ThesisModal({
     <View
       style={{
         width: SCREEN_WIDTH * 0.8,
-        marginTop: 20,
+        minHeight: 180,
       }}
     >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: current === 0 ? "center" : "space-between",
+          alignItems: "center",
+          paddingVertical: 10,
+        }}
+      >
+        {current !== 0 && (
+          <ButtonComponent
+            onClick={() => {
+              setCurrent((prev) => prev - 1);
+              setError(false);
+            }}
+            style={{ container: { height: 30 } }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </ButtonComponent>
+        )}
+        {current !== 0 &&
+          (fields[current].field === "files" ? (
+            <ButtonComponent
+              onClick={() => openFile(file?.uri)}
+              disabled={!file}
+              style={{
+                container: { width: 180, backgroundColor: "#ccc" },
+              }}
+            >
+              {file ? file.name : fields[current].fieldName}
+            </ButtonComponent>
+          ) : (
+            <Text style={{ fontSize: 16, width: 100, textAlign: "center" }}>
+              {fields[current].fieldName}
+            </Text>
+          ))}
+        {current !== 5 ? (
+          <ButtonComponent
+            onClick={() => {
+              let thesisField =
+                fields[current].field === "files"
+                  ? file
+                  : thesis[fields[current].field];
+              if (thesisField || current == 4) {
+                setError(false);
+                setCurrent((prev) => prev + 1);
+              } else setError(true);
+            }}
+            style={{ container: { height: 30 } }}
+          >
+            <FontAwesomeIcon icon={faArrowRight} />
+          </ButtonComponent>
+        ) : createThesis ? (
+          <ButtonComponent
+            onClick={() => {
+              if (thesis[fields[current].field].length) {
+                createThesis();
+                setError(false);
+              } else setError(true);
+            }}
+            style={{ container: { height: 50 } }}
+          >
+            <FontAwesomeIcon icon={faPlus} />
+          </ButtonComponent>
+        ) : (
+          <ButtonComponent
+            onClick={() => {
+              if (thesis[fields[current].field].length) {
+                updateThesis();
+                setError(false);
+              } else setError(true);
+            }}
+            style={{ container: { height: 50 } }}
+          >
+            <FontAwesomeIcon icon={faPen} />
+          </ButtonComponent>
+        )}
+      </View>
       <View style={{}}>
         {current === 0 && (
           <InputBox
@@ -151,110 +198,84 @@ function ThesisModal({
           </ButtonComponent>
         )}
         {current === 4 && (
-          <ButtonComponent
-            rounded
-            onClick={() =>
-              dispatch(
-                openSearchModal("student", (value) =>
-                  onChangeDetail("partner", value.id)
+          <>
+            <ButtonComponent
+              rounded
+              onClick={() =>
+                dispatch(
+                  openSearchModal("student", (value) =>
+                    onChangeDetail("partner", value)
+                  )
                 )
-              )
-            }
-          >
-            {thesis.partner ? "Chọn lại..." : "Chọn..."}
-          </ButtonComponent>
+              }
+            >
+              Chọn...
+            </ButtonComponent>
+            {thesis.partner ? (
+              <UserItem
+                item={thesis.partner}
+                key={thesis.partner?.id}
+                onPressUserItem={() => {}}
+                onLongPressUserItem={() =>
+                  dispatch(
+                    openRemoveModal(() => {
+                      onChangeDetail("partner", null);
+                      dispatch(closeRemoveModal());
+                    })
+                  )
+                }
+              />
+            ) : (
+              <></>
+            )}
+          </>
         )}
 
         {current === 5 && (
-          <View style={{ width: "100%", marginTop: 20 }}>
-            <MultiSelectComponent
-              data={lecturers}
-              onChangeSelected={(value) => onChangeDetail("supervisors", value)}
-              selected={thesis?.supervisors}
-              placeholder="Chọn..."
-              maxSelect={2}
-              hide={!thesis.supervisors}
-              onChangeText={onChangeLecturerSearch}
-            />
-          </View>
+          <>
+            <ButtonComponent
+              rounded
+              onClick={() =>
+                dispatch(
+                  openSearchModal("lecturer", (value) =>
+                    onChangeDetail("supervisors", [
+                      ...thesis.supervisors,
+                      value,
+                    ])
+                  )
+                )
+              }
+            >
+              Chọn...
+            </ButtonComponent>
+            {thesis.supervisors ? (
+              thesis.supervisors.map((supervisor) => (
+                <UserItem
+                  item={supervisor}
+                  key={supervisor.id}
+                  onPressUserItem={() => {}}
+                  onLongPressUserItem={() =>
+                    dispatch(
+                      openRemoveModal(() => {
+                        onChangeDetail(
+                          "supervisors",
+                          thesis.supervisors.filter(
+                            (item) => item.id !== supervisor.id
+                          )
+                        );
+                        dispatch(closeRemoveModal());
+                      })
+                    )
+                  }
+                />
+              ))
+            ) : (
+              <></>
+            )}
+          </>
         )}
       </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: current === 0 ? "center" : "space-between",
-          marginTop: 20,
-          alignItems: "center",
-        }}
-      >
-        {current !== 0 && (
-          <ButtonComponent
-            onClick={() => {
-              setCurrent((prev) => prev - 1);
-              setError(false);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </ButtonComponent>
-        )}
-        {current !== 0 &&
-          (fields[current].field === "files" ? (
-            <ButtonComponent
-              onClick={() => openFile(file?.uri)}
-              disabled={!file}
-              style={{ container: { width: 180 } }}
-            >
-              {file ? file.name : fields[current].fieldName}
-            </ButtonComponent>
-          ) : (
-            <Text style={{ fontSize: 16, width: 100, textAlign: "center" }}>
-              {fields[current].fieldName}
-            </Text>
-          ))}
-        {current !== 5 ? (
-          <ButtonComponent
-            onClick={() => {
-              let thesisField =
-                fields[current].field === "files"
-                  ? file
-                  : thesis[fields[current].field];
-              if (thesisField || current == 4) {
-                setError(false);
-                setCurrent((prev) => prev + 1);
-              } else setError(true);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faArrowRight} />
-          </ButtonComponent>
-        ) : createThesis ? (
-          <ButtonComponent
-            onClick={() => {
-              if (thesis[fields[current].field].length) {
-                createThesis();
-                setError(false);
-              } else setError(true);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faPlus} />
-          </ButtonComponent>
-        ) : (
-          <ButtonComponent
-            onClick={() => {
-              if (thesis[fields[current].field].length) {
-                updateThesis();
-                setError(false);
-              } else setError(true);
-            }}
-            style={{ container: { height: 50 } }}
-          >
-            <FontAwesomeIcon icon={faPen} />
-          </ButtonComponent>
-        )}
-      </View>
       {error && <Text style={{ color: "red" }}>Nhập thông tin!!!</Text>}
     </View>
   );
