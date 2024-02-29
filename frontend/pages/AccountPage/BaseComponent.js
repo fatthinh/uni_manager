@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DetailLayout from "../../layouts/DetailLayout";
 import { useNavigation } from "@react-navigation/native";
-import { ActivityIndicator, Image, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, Text, View } from "react-native";
 import images from "../../assets/images";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { authAPIWithoutParams, endpoints } from "../../configs/API";
@@ -9,7 +9,6 @@ import { styles } from "./styles";
 import ButtonComponent from "../../components/ButtonComponent";
 import InputBox from "../../components/InputBox";
 import DropdownComponent from "../../components/Dropdown";
-import ModalComponent from "../../components/ModalComponent";
 
 const ROLES = [
   { label: "Sinh viên", value: "STUDENT" },
@@ -17,6 +16,8 @@ const ROLES = [
   { label: "Giáo vụ", value: "PROVOST" },
   { label: "Quản trị", value: "MANAGER" },
 ];
+
+const SCREEN_HEIGHT = Dimensions.get('window').height
 
 function BaseComponent({
   userInfo,
@@ -125,7 +126,16 @@ function BaseComponent({
       {user === null ? (
         <ActivityIndicator />
       ) : (
-        <View style={{ marginTop: 26 }}>
+        <View
+          style={{
+            margin: 12,
+            borderWidth: 8,
+            borderColor: "#ccc",
+            padding: 20,
+            borderRadius: 8,
+            height: SCREEN_HEIGHT - 98
+          }}
+        >
           <View style={styles.header}>
             <ButtonComponent
               style={styles.avatarContainer}

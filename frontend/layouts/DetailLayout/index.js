@@ -55,8 +55,8 @@ function DetailLayout({
         style={[
           customStyles && customStyles.children,
           actionsShow
-            ? { height: SCREEN_HEIGHT - 150 }
-            : { height: SCREEN_HEIGHT - 110 },
+            ? { height: SCREEN_HEIGHT - 160 }
+            : { height: SCREEN_HEIGHT - 130 },
           !childrenActions && { height: SCREEN_HEIGHT - 80 },
         ]}
       >

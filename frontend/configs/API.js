@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseConfig = {
-  baseURL: "http://192.168.1.42:8000/api/",
+  baseURL: "https://lpthinh.pythonanywhere.com/api/",
 };
 
 export const endpoints = {

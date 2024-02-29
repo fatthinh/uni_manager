@@ -19,8 +19,8 @@ import { useDispatch } from "react-redux";
 import { closeSearchModal } from "../../redux/actions/searchModal";
 
 function SearchModal({ visible, onClickModalItem, filter }) {
-  const [searchValue, setSearchValue] = useState(null);
-  const [searchResult, setSearchResult] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchResult, setSearchResult] = useState([]);
   const debounceValue = useDebounce(searchValue, 300);
   const dispatch = useDispatch();
 
@@ -87,7 +87,7 @@ function SearchModal({ visible, onClickModalItem, filter }) {
             maxHeight: 654,
           }}
         >
-          {searchResult !== null ? (
+          {searchResult.length ? (
             searchResult.map((item) => (
               <UserItem
                 key={item.id}

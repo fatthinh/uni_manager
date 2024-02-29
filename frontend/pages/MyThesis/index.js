@@ -33,7 +33,7 @@ function MyThesis({ route }) {
       });
       setFile({
         name: data.files.split("/").pop(),
-        uri: `http://192.168.1.42:8000${data.files}`,
+        uri: `https://lpthinh.pythonanywhere.com${data.files}`,
       });
     } catch (error) {
       setThesis({
@@ -136,7 +136,7 @@ function MyThesis({ route }) {
     loadThesis();
   }, [token, updated]);
 
-  console.log(thesis.supervisors)
+  console.log(thesis.supervisors);
 
   return (
     <>

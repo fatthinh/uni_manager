@@ -55,7 +55,7 @@ function AdministratorPage({ route, navigation }) {
         endpoints.users
       );
       setUsers(response.data.results);
-      setTotalPages(Math.ceil(response.data.count / 10));
+      setTotalPages(Math.ceil(response.data.count / 8));
     } catch (ex) {
       setUsers([]);
       console.error(ex);

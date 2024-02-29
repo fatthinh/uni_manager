@@ -40,6 +40,7 @@ function ThesisModal({
   const dispatch = useDispatch();
 
   const openFile = (fileUrl) => {
+    console.log(fileUrl)
     Linking.canOpenURL(fileUrl).then((supported) => {
       if (supported) {
         Linking.openURL(fileUrl);

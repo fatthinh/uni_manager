@@ -67,7 +67,7 @@ function ThesisPage({ navigation, route }) {
   };
 
   const openFile = (fileUrl) => {
-    let url = `http://192.168.1.42:8000${fileUrl}`;
+    let url = `https://lpthinh.pythonanywhere.com${fileUrl}`;
     Linking.canOpenURL(url).then((supported) => {
       if (supported) {
         Linking.openURL(url);
@@ -242,7 +242,7 @@ function ThesisPage({ navigation, route }) {
         unVisible={() => setReviewsModal(false)}
         animationType="slide"
       >
-        <View style={{ height: "100%" }}>
+        <View style={{ height: "100%", marginTop: 32 }}>
           <ButtonComponent
             leftIcon={faAngleDown}
             style={{

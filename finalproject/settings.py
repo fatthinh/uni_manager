@@ -93,13 +93,23 @@ WSGI_APPLICATION = 'finalproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'finalprojectdb',
+#         'USER': 'root',
+#         'PASSWORD': '0335037042Think.',
+#         'PORT': ''
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'finalprojectdb',
         'USER': 'root',
         'PASSWORD': '0335037042Think.',
-        'PORT': ''
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 pymysql.install_as_MySQLdb()
